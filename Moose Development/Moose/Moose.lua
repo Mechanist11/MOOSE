@@ -47,6 +47,7 @@ Include.File( "AI/AI_Patrol" )
 Include.File( "AI/AI_Cap" )
 Include.File( "AI/AI_Cas" )
 Include.File( "AI/AI_Cargo" )
+Include.File( "AI/AI_Formation" )
 
 --- Actions
 Include.File( "Actions/Act_Assign" )

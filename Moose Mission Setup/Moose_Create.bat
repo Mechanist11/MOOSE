@@ -84,6 +84,7 @@ COPY /b Moose.lua + %1\AI\AI_Patrol.lua           		Moose.lua
 COPY /b Moose.lua + %1\AI\AI_Cas.lua                 	Moose.lua
 COPY /b Moose.lua + %1\AI\AI_Cap.lua                 	Moose.lua
 COPY /b Moose.lua + %1\AI\AI_Cargo.lua                 	Moose.lua
+COPY /b Moose.lua + %1\AI\AI_Formation.lua              Moose.lua
 
 
 rem Actions
