@@ -30,7 +30,7 @@
 -- 
 -- Find below a list of the **assigned task** methods:
 -- 
---   * @{#CONTROLLABLE.TaskAttackControllable}: (AIR) Attack a Controllable.
+--   * @{#CONTROLLABLE.TaskAttackGroup}: (AIR) Attack a Controllable.
 --   * @{#CONTROLLABLE.TaskAttackMapObject}: (AIR) Attacking the map object (building, structure, e.t.c).
 --   * @{#CONTROLLABLE.TaskAttackUnit}: (AIR) Attack the Unit.
 --   * @{#CONTROLLABLE.TaskBombing}: (AIR) Delivering weapon at the point on the ground.
@@ -38,7 +38,7 @@
 --   * @{#CONTROLLABLE.TaskEmbarking}: (AIR) Move the controllable to a Vec2 Point, wait for a defined duration and embark a controllable.
 --   * @{#CONTROLLABLE.TaskEmbarkToTransport}: (GROUND) Embark to a Transport landed at a location.
 --   * @{#CONTROLLABLE.TaskEscort}: (AIR) Escort another airborne controllable. 
---   * @{#CONTROLLABLE.TaskFAC_AttackControllable}: (AIR + GROUND) The task makes the controllable/unit a FAC and orders the FAC to control the target (enemy ground controllable) destruction.
+--   * @{#CONTROLLABLE.TaskFAC_AttackGroup}: (AIR + GROUND) The task makes the controllable/unit a FAC and orders the FAC to control the target (enemy ground controllable) destruction.
 --   * @{#CONTROLLABLE.TaskFireAtPoint}: (GROUND) Fire some or all ammunition at a VEC2 point.
 --   * @{#CONTROLLABLE.TaskFollow}: (AIR) Following another airborne controllable.
 --   * @{#CONTROLLABLE.TaskHold}: (GROUND) Hold ground controllable from moving.
@@ -221,6 +221,24 @@ end
 
 
 -- Tasks
+
+--- Clear all tasks from the controllable.
+-- @param #CONTROLLABLE self
+-- @return #CONTROLLABLE
+function CONTROLLABLE:ClearTasks()
+  self:F2()
+
+  local DCSControllable = self:GetDCSObject()
+
+  if DCSControllable then
+    local Controller = self:_GetController()
+    Controller:resetTask()
+    return self
+  end
+
+  return nil
+end
+
 
 --- Popping current Task from the controllable.
 -- @param #CONTROLLABLE self
@@ -469,13 +487,13 @@ end
 -- @param #number AttackQty (optional) This parameter limits maximal quantity of attack. The aicraft/controllable will not make more attack than allowed even if the target controllable not destroyed and the aicraft/controllable still have ammo. If not defined the aircraft/controllable will attack target until it will be destroyed or until the aircraft/controllable will run out of ammo.
 -- @param Dcs.DCSTypes#Azimuth Direction (optional) Desired ingress direction from the target to the attacking aircraft. Controllable/aircraft will make its attacks from the direction. Of course if there is no way to attack from the direction due the terrain controllable/aircraft will choose another direction.
 -- @param Dcs.DCSTypes#Distance Altitude (optional) Desired attack start altitude. Controllable/aircraft will make its attacks from the altitude. If the altitude is too low or too high to use weapon aircraft/controllable will choose closest altitude to the desired attack start altitude. If the desired altitude is defined controllable/aircraft will not attack from safe altitude.
--- @param #boolean AttackQtyLimit (optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackControllable" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.
+-- @param #boolean AttackQtyLimit (optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackGroup" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.
 -- @return Dcs.DCSTasking.Task#Task The DCS task structure.
 function CONTROLLABLE:TaskAttackGroup( AttackGroup, WeaponType, WeaponExpend, AttackQty, Direction, Altitude, AttackQtyLimit )
   self:F2( { self.ControllableName, AttackGroup, WeaponType, WeaponExpend, AttackQty, Direction, Altitude, AttackQtyLimit } )
 
-  --  AttackControllable = {
-  --   id = 'AttackControllable',
+  --  AttackGroup = {
+  --   id = 'AttackGroup',
   --   params = {
   --     groupId = Group.ID,
   --     weaponType = number,
@@ -500,7 +518,7 @@ function CONTROLLABLE:TaskAttackGroup( AttackGroup, WeaponType, WeaponExpend, At
   end
 
   local DCSTask
-  DCSTask = { id = 'AttackControllable',
+  DCSTask = { id = 'AttackGroup',
     params = {
       groupId = AttackGroup:GetID(),
       weaponType = WeaponType,
@@ -518,47 +536,35 @@ function CONTROLLABLE:TaskAttackGroup( AttackGroup, WeaponType, WeaponExpend, At
   return DCSTask
 end
 
-
 --- (AIR) Attack the Unit.
 -- @param #CONTROLLABLE self
--- @param Wrapper.Unit#UNIT AttackUnit The unit.
--- @param #number WeaponType (optional) Bitmask of weapon types those allowed to use. If parameter is not defined that means no limits on weapon usage.
+-- @param Wrapper.Unit#UNIT AttackUnit The UNIT.
+-- @param #boolean GroupAttack (optional) If true, all units in the group will attack the Unit when found.
 -- @param Dcs.DCSTypes#AI.Task.WeaponExpend WeaponExpend (optional) Determines how much weapon will be released at each attack. If parameter is not defined the unit / controllable will choose expend on its own discretion.
 -- @param #number AttackQty (optional) This parameter limits maximal quantity of attack. The aicraft/controllable will not make more attack than allowed even if the target controllable not destroyed and the aicraft/controllable still have ammo. If not defined the aircraft/controllable will attack target until it will be destroyed or until the aircraft/controllable will run out of ammo.
 -- @param Dcs.DCSTypes#Azimuth Direction (optional) Desired ingress direction from the target to the attacking aircraft. Controllable/aircraft will make its attacks from the direction. Of course if there is no way to attack from the direction due the terrain controllable/aircraft will choose another direction.
--- @param #boolean AttackQtyLimit (optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackControllable" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.
--- @param #boolean ControllableAttack (optional) Flag indicates that the target must be engaged by all aircrafts of the controllable. Has effect only if the task is assigned to a controllable, not to a single aircraft.
+-- @param #number Altitude (optional) The altitude from where to attack.
+-- @param #boolean Visible (optional) not a clue.
+-- @param #number WeaponType (optional) The WeaponType.
 -- @return Dcs.DCSTasking.Task#Task The DCS task structure.
-function CONTROLLABLE:TaskAttackUnit( AttackUnit, WeaponType, WeaponExpend, AttackQty, Direction, AttackQtyLimit, ControllableAttack )
-  self:F2( { self.ControllableName, AttackUnit, WeaponType, WeaponExpend, AttackQty, Direction, AttackQtyLimit, ControllableAttack } )
-
-  --  AttackUnit = {
-  --    id = 'AttackUnit',
-  --    params = {
-  --      unitId = Unit.ID,
-  --      weaponType = number,
-  --      expend = enum AI.Task.WeaponExpend
-  --      attackQty = number,
-  --      direction = Azimuth,
-  --      attackQtyLimit = boolean,
-  --      controllableAttack = boolean,
-  --    }
-  --  }
+function CONTROLLABLE:TaskAttackUnit( AttackUnit, GroupAttack, WeaponExpend, AttackQty, Direction, Altitude, Visible, WeaponType )
+  self:F2( { self.ControllableName,          AttackUnit, GroupAttack, WeaponExpend, AttackQty, Direction, Altitude, Visible, WeaponType } )
 
   local DCSTask
   DCSTask = { 
     id = 'AttackUnit',
     params = {
-      altitudeEnabled = true,
       unitId = AttackUnit:GetID(),
-      attackQtyLimit = AttackQtyLimit or false,
-      attackQty = AttackQty or 2,
+      groupAttack = GroupAttack or false,
+      visible = Visible or false,
       expend = WeaponExpend or "Auto",
-      altitude = 2000,
-      directionEnabled = true,
-      groupAttack = true,
-      --weaponType = WeaponType or 1073741822,
-      direction = Direction or 0,
+      directionEnabled = Direction and true or false,
+      direction = Direction,
+      altitudeEnabled = Altitude and true or false,
+      altitude = Altitude or 30,
+      attackQtyLimit = AttackQty and true or false,
+      attackQty = AttackQty,
+      weaponType = WeaponType
     }
   }
 
@@ -573,7 +579,7 @@ end
 -- @param Dcs.DCSTypes#Vec2 Vec2 2D-coordinates of the point to deliver weapon at.
 -- @param #number WeaponType (optional) Bitmask of weapon types those allowed to use. If parameter is not defined that means no limits on weapon usage.
 -- @param Dcs.DCSTypes#AI.Task.WeaponExpend WeaponExpend (optional) Determines how much weapon will be released at each attack. If parameter is not defined the unit / controllable will choose expend on its own discretion.
--- @param #number AttackQty (optional) Desired quantity of passes. The parameter is not the same in AttackControllable and AttackUnit tasks. 
+-- @param #number AttackQty (optional) Desired quantity of passes. The parameter is not the same in AttackGroup and AttackUnit tasks. 
 -- @param Dcs.DCSTypes#Azimuth Direction (optional) Desired ingress direction from the target to the attacking aircraft. Controllable/aircraft will make its attacks from the direction. Of course if there is no way to attack from the direction due the terrain controllable/aircraft will choose another direction.
 -- @param #boolean ControllableAttack (optional) Flag indicates that the target must be engaged by all aircrafts of the controllable. Has effect only if the task is assigned to a controllable, not to a single aircraft.
 -- @return Dcs.DCSTasking.Task#Task The DCS task structure.
@@ -1018,8 +1024,8 @@ end
 function CONTROLLABLE:TaskFAC_AttackGroup( AttackGroup, WeaponType, Designation, Datalink )
   self:F2( { self.ControllableName, AttackGroup, WeaponType, Designation, Datalink } )
 
---  FAC_AttackControllable = { 
---    id = 'FAC_AttackControllable', 
+--  FAC_AttackGroup = { 
+--    id = 'FAC_AttackGroup', 
 --    params = { 
 --      groupId = Group.ID,
 --      weaponType = number,
@@ -1029,7 +1035,7 @@ function CONTROLLABLE:TaskFAC_AttackGroup( AttackGroup, WeaponType, Designation,
 --  }
 
   local DCSTask
-  DCSTask = { id = 'FAC_AttackControllable',
+  DCSTask = { id = 'FAC_AttackGroup',
     params = {
       groupId = AttackGroup:GetID(),
       weaponType = WeaponType,
@@ -1121,7 +1127,7 @@ end
 -- @param #number AttackQty (optional) This parameter limits maximal quantity of attack. The aicraft/controllable will not make more attack than allowed even if the target controllable not destroyed and the aicraft/controllable still have ammo. If not defined the aircraft/controllable will attack target until it will be destroyed or until the aircraft/controllable will run out of ammo.
 -- @param Dcs.DCSTypes#Azimuth Direction (optional) Desired ingress direction from the target to the attacking aircraft. Controllable/aircraft will make its attacks from the direction. Of course if there is no way to attack from the direction due the terrain controllable/aircraft will choose another direction.
 -- @param Dcs.DCSTypes#Distance Altitude (optional) Desired attack start altitude. Controllable/aircraft will make its attacks from the altitude. If the altitude is too low or too high to use weapon aircraft/controllable will choose closest altitude to the desired attack start altitude. If the desired altitude is defined controllable/aircraft will not attack from safe altitude.
--- @param #boolean AttackQtyLimit (optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackControllable" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.
+-- @param #boolean AttackQtyLimit (optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackGroup" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.
 -- @return Dcs.DCSTasking.Task#Task The DCS task structure.
 function CONTROLLABLE:EnRouteTaskEngageGroup( AttackGroup, Priority, WeaponType, WeaponExpend, AttackQty, Direction, Altitude, AttackQtyLimit )
   self:F2( { self.ControllableName, AttackGroup, Priority, WeaponType, WeaponExpend, AttackQty, Direction, Altitude, AttackQtyLimit } )
@@ -1173,7 +1179,7 @@ function CONTROLLABLE:EnRouteTaskEngageGroup( AttackGroup, Priority, WeaponType,
 end
 
 
---- (AIR) Attack the Unit.
+--- (AIR) Search and attack the Unit.
 -- @param #CONTROLLABLE self
 -- @param Wrapper.Unit#UNIT EngageUnit The UNIT.
 -- @param #number Priority (optional) All en-route tasks have the priority parameter. This is a number (less value - higher priority) that determines actions related to what task will be performed first. 
@@ -1454,7 +1460,7 @@ end
 -- @param Dcs.DCSTypes#Vec3 Point The destination point in Vec3 format.
 -- @param #number Speed The speed to travel.
 -- @return #CONTROLLABLE self
-function CONTROLLABLE:TaskRouteToVec2( Point, Speed )
+function CONTROLLABLE:RouteToVec2( Point, Speed )
   self:F2( { Point, Speed } )
 
   local ControllablePoint = self:GetUnit( 1 ):GetVec2()
@@ -1505,7 +1511,7 @@ end
 -- @param Dcs.DCSTypes#Vec3 Point The destination point in Vec3 format.
 -- @param #number Speed The speed to travel.
 -- @return #CONTROLLABLE self
-function CONTROLLABLE:TaskRouteToVec3( Point, Speed )
+function CONTROLLABLE:RouteToVec3( Point, Speed )
   self:F2( { Point, Speed } )
 
   local ControllableVec3 = self:GetUnit( 1 ):GetVec3()
@@ -1602,7 +1608,7 @@ function CONTROLLABLE:TaskRouteToZone( Zone, Randomize, Speed, Formation )
     PointFrom.x = ControllablePoint.x
     PointFrom.y = ControllablePoint.y
     PointFrom.type = "Turning Point"
-    PointFrom.action = "Cone"
+    PointFrom.action = Formation or "Cone"
     PointFrom.speed = 20 / 1.6
 
 

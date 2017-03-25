@@ -1,34 +1,111 @@
---- This module contains the BASE class.
+--- **Core** - BASE forms **the basis of the MOOSE framework**. Each class within the MOOSE framework derives from BASE.
 -- 
--- 1) @{#BASE} class
--- =================
--- The @{#BASE} class is the super class for all the classes defined within MOOSE.
+-- ![Banner Image](..\Presentations\BASE\Dia1.JPG)
 -- 
--- It handles:
+-- ===
 -- 
---   * The construction and inheritance of child classes.
---   * The tracing of objects during mission execution within the **DCS.log** file, under the **"Saved Games\DCS\Logs"** folder.
+-- The @{#BASE} class is the core root class from where every other class in moose is derived.
 -- 
--- Note: Normally you would not use the BASE class unless you are extending the MOOSE framework with new classes.
+-- ===
+-- 
+-- # **API CHANGE HISTORY**
+-- 
+-- The underlying change log documents the API changes. Please read this carefully. The following notation is used:
+-- 
+--   * **Added** parts are expressed in bold type face.
+--   * _Removed_ parts are expressed in italic type face.
+-- 
+-- YYYY-MM-DD: CLASS:**NewFunction**( Params ) replaces CLASS:_OldFunction_( Params )
+-- YYYY-MM-DD: CLASS:**NewFunction( Params )** added
+-- 
+-- Hereby the change log:
+-- 
+-- ===
+-- 
+-- # **AUTHORS and CONTRIBUTIONS**
+-- 
+-- ### Contributions: 
+-- 
+--   * None.
+-- 
+-- ### Authors: 
+-- 
+--   * **FlightControl**: Design & Programming
+-- 
+-- @module Base
+
+
+
+local _TraceOnOff = true
+local _TraceLevel = 1
+local _TraceAll = false
+local _TraceClass = {}
+local _TraceClassMethod = {}
+
+local _ClassID = 0
+
+--- @type BASE
+-- @field ClassName The name of the class.
+-- @field ClassID The ID number of the class.
+-- @field ClassNameAndID The name of the class concatenated with the ID number of the class.
+
+--- # 1) #BASE class
+-- 
+-- All classes within the MOOSE framework are derived from the BASE class. 
+--  
+-- BASE provides facilities for :
+-- 
+--   * The construction and inheritance of MOOSE classes.
+--   * The class naming and numbering system.
+--   * The class hierarchy search system.
+--   * The tracing of information or objects during mission execution for debuggin purposes.
+--   * The subscription to DCS events for event handling in MOOSE objects.
+-- 
+-- Note: The BASE class is an abstract class and is not meant to be used directly.
 -- 
 -- ## 1.1) BASE constructor
 -- 
--- Any class derived from BASE, must use the @{Base#BASE.New) constructor within the @{Base#BASE.Inherit) method. 
+-- Any class derived from BASE, will use the @{Base#BASE.New} constructor embedded in the @{Base#BASE.Inherit} method. 
 -- See an example at the @{Base#BASE.New} method how this is done.
 -- 
--- ## 1.2) BASE Trace functionality
+-- ## 1.2) Trace information for debugging
 -- 
 -- The BASE class contains trace methods to trace progress within a mission execution of a certain object.
--- Note that these trace methods are inherited by each MOOSE class interiting BASE.
--- As such, each object created from derived class from BASE can use the tracing functions to trace its execution.
+-- These trace methods are inherited by each MOOSE class interiting BASE, soeach object created from derived class from BASE can use the tracing methods to trace its execution.
 -- 
--- ### 1.2.1) Tracing functions
+-- Any type of information can be passed to these tracing methods. See the following examples:
+-- 
+--     self:E( "Hello" )
+-- 
+-- Result in the word "Hello" in the dcs.log.
+-- 
+--     local Array = { 1, nil, "h", { "a","b" }, "x" }
+--     self:E( Array )
+--     
+-- Results with the text [1]=1,[3]="h",[4]={[1]="a",[2]="b"},[5]="x"} in the dcs.log.   
+-- 
+--     local Object1 = "Object1"
+--     local Object2 = 3
+--     local Object3 = { Object 1, Object 2 }
+--     self:E( { Object1, Object2, Object3 } )
+--     
+-- Results with the text [1]={[1]="Object",[2]=3,[3]={[1]="Object",[2]=3}} in the dcs.log.
+--     
+--     local SpawnObject = SPAWN:New( "Plane" )
+--     local GroupObject = GROUP:FindByName( "Group" )
+--     self:E( { Spawn = SpawnObject, Group = GroupObject } )
+-- 
+-- Results with the text [1]={Spawn={....),Group={...}} in the dcs.log.  
+-- 
+-- Below a more detailed explanation of the different method types for tracing.
+-- 
+-- ### 1.2.1) Tracing methods categories
 --
--- There are basically 3 types of tracing methods available within BASE:
+-- There are basically 3 types of tracing methods available:
 -- 
---   * @{#BASE.F}: Trace the beginning of a function and its given parameters. An F is indicated at column 44 in the DCS.log file.
---   * @{#BASE.T}: Trace further logic within a function giving optional variables or parameters. A T is indicated at column 44 in the DCS.log file.
---   * @{#BASE.E}: Trace an exception within a function giving optional variables or parameters. An E is indicated at column 44 in the DCS.log file. An exception will always be traced.
+--   * @{#BASE.F}: Used to trace the entrance of a function and its given parameters. An F is indicated at column 44 in the DCS.log file.
+--   * @{#BASE.T}: Used to trace further logic within a function giving optional variables or parameters. A T is indicated at column 44 in the DCS.log file.
+--   * @{#BASE.E}: Used to always trace information giving optional variables or parameters. An E is indicated at column 44 in the DCS.log file.
 -- 
 -- ### 1.2.2) Tracing levels
 --
@@ -51,6 +128,7 @@
 --   * Activate only the tracing of a certain class (name) through the @{#BASE.TraceClass}() method.
 --   * Activate only the tracing of a certain method of a certain class through the @{#BASE.TraceClassMethod}() method.
 --   * Activate only the tracing of a certain level through the @{#BASE.TraceLevel}() method.
+-- 
 -- ### 1.2.4) Check if tracing is on.
 -- 
 -- The method @{#BASE.IsTrace}() will validate if tracing is activated or not.
@@ -64,7 +142,7 @@
 -- 
 -- At first, the mission designer will need to **Subscribe** to a specific DCS event for the class.
 -- So, when the DCS event occurs, the class will be notified of that event.
--- There are two functions which you use to subscribe to or unsubscribe from an event.
+-- There are two methods which you use to subscribe to or unsubscribe from an event.
 -- 
 --   * @{#BASE.HandleEvent}(): Subscribe to a DCS Event.
 --   * @{#BASE.UnHandleEvent}(): Unsubscribe from a DCS Event.
@@ -114,10 +192,12 @@
 -- 
 -- ## 1.5) All objects derived from BASE can have "States"
 -- 
--- A mechanism is in place in MOOSE, that allows to let the objects administer **states**. 
--- States are essentially properties of objects, which are identified by a **Key** and a **Value**.
--- The method @{#BASE.SetState}() can be used to set a Value with a reference Key to the object.
--- To **read or retrieve** a state Value based on a Key, use the @{#BASE.GetState} method.
+-- A mechanism is in place in MOOSE, that allows to let the objects administer **states**.  
+-- States are essentially properties of objects, which are identified by a **Key** and a **Value**.  
+-- 
+-- The method @{#BASE.SetState}() can be used to set a Value with a reference Key to the object.  
+-- To **read or retrieve** a state Value based on a Key, use the @{#BASE.GetState} method.  
+-- 
 -- These two methods provide a very handy way to keep state at long lasting processes.
 -- Values can be stored within the objects, and later retrieved or changed when needed.
 -- There is one other important thing to note, the @{#BASE.SetState}() and @{#BASE.GetState} methods
@@ -125,56 +205,17 @@
 -- Thus, if the state is to be set for the same object as the object for which the method is used, then provide the same
 -- object name to the method.
 -- 
--- ## 1.10) BASE Inheritance (tree) support
+-- ## 1.10) Inheritance
 -- 
--- The following methods are available to support inheritance:
+-- The following methods are available to implement inheritance
 -- 
 --   * @{#BASE.Inherit}: Inherits from a class.
 --   * @{#BASE.GetParent}: Returns the parent object from the object it is handling, or nil if there is no parent object.
---   
--- ====
--- 
--- # **API CHANGE HISTORY**
--- 
--- The underlying change log documents the API changes. Please read this carefully. The following notation is used:
--- 
---   * **Added** parts are expressed in bold type face.
---   * _Removed_ parts are expressed in italic type face.
--- 
--- YYYY-MM-DD: CLASS:**NewFunction**( Params ) replaces CLASS:_OldFunction_( Params )
--- YYYY-MM-DD: CLASS:**NewFunction( Params )** added
--- 
--- Hereby the change log:
 -- 
 -- ===
 -- 
--- # **AUTHORS and CONTRIBUTIONS**
+-- @field #BASE BASE
 -- 
--- ### Contributions: 
--- 
---   * None.
--- 
--- ### Authors: 
--- 
---   * **FlightControl**: Design & Programming
--- 
--- @module Base
-
-
-
-local _TraceOnOff = true
-local _TraceLevel = 1
-local _TraceAll = false
-local _TraceClass = {}
-local _TraceClassMethod = {}
-
-local _ClassID = 0
-
---- The BASE Class
--- @type BASE
--- @field ClassName The name of the class.
--- @field ClassID The ID number of the class.
--- @field ClassNameAndID The name of the class concatenated with the ID number of the class.
 BASE = {
   ClassName = "BASE",
   ClassID = 0,
@@ -192,7 +233,17 @@ FORMATION = {
 
 
 
--- @todo need to investigate if the deepCopy is really needed... Don't think so.
+--- BASE constructor.  
+-- 
+-- This is an example how to use the BASE:New() constructor in a new class definition when inheriting from BASE.
+--  
+--     function EVENT:New()
+--       local self = BASE:Inherit( self, BASE:New() ) -- #EVENT
+--       return self
+--     end
+--       
+-- @param #BASE self
+-- @return #BASE
 function BASE:New()
   local self = routines.utils.deepCopy( self ) -- Create a new self instance
 	local MetaTable = {}
@@ -211,12 +262,14 @@ function BASE:_Destructor()
   --self:EventRemoveAll()
 end
 
+
+-- THIS IS WHY WE NEED LUA 5.2 ...
 function BASE:_SetDestructor()
 
   -- TODO: Okay, this is really technical...
   -- When you set a proxy to a table to catch __gc, weak tables don't behave like weak...
   -- Therefore, I am parking this logic until I've properly discussed all this with the community.
-  --[[
+
   local proxy = newproxy(true)
   local proxyMeta = getmetatable(proxy)
 
@@ -231,7 +284,7 @@ function BASE:_SetDestructor()
   -- table is about to be garbage-collected - then the __gc hook
   -- will be invoked and the destructor called
   rawset( self, '__proxy', proxy )
-  --]]
+  
 end
 
 --- This is the worker method to inherit from a parent class.
@@ -247,13 +300,18 @@ function BASE:Inherit( Child, Parent )
 		setmetatable( Child, Parent )
 		Child.__index = Child
 		
-		Child:_SetDestructor()
+		--Child:_SetDestructor()
 	end
 	--self:T( 'Inherited from ' .. Parent.ClassName ) 
 	return Child
 end
 
---- This is the worker method to retrieve the Parent class.
+--- This is the worker method to retrieve the Parent class.  
+-- Note that the Parent class must be passed to call the parent class method.
+-- 
+--     self:GetParent(self):ParentMethod()
+--     
+--     
 -- @param #BASE self
 -- @param #BASE Child is the Child class from which the Parent class needs to be retrieved.
 -- @return #BASE

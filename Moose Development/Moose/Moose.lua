@@ -1,4 +1,5 @@
 --- The main include file for the MOOSE system.
+-- Test of permissions
 
 --- Core Routines
 Include.File( "Utilities/Routines" )
@@ -16,6 +17,7 @@ Include.File( "Core/Set" )
 Include.File( "Core/Point" )
 Include.File( "Core/Message" )
 Include.File( "Core/Fsm" )
+Include.File( "Core/Radio" )
 
 --- Wrapper Classes
 Include.File( "Wrapper/Object" )
@@ -27,6 +29,7 @@ Include.File( "Wrapper/Unit" )
 Include.File( "Wrapper/Client" )
 Include.File( "Wrapper/Static" )
 Include.File( "Wrapper/Airbase" )
+Include.File( "Wrapper/Scenery" )
 
 --- Functional Classes
 Include.File( "Functional/Scoring" )
@@ -57,7 +60,7 @@ Include.File( "Tasking/CommandCenter" )
 Include.File( "Tasking/Mission" )
 Include.File( "Tasking/Task" )
 Include.File( "Tasking/DetectionManager" )
-Include.File( "Tasking/Task_SEAD" )
+Include.File( "Tasking/Task_A2G_Dispatcher")
 Include.File( "Tasking/Task_A2G" )
 
 

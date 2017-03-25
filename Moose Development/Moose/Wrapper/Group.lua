@@ -76,6 +76,9 @@
 -- 
 -- Hereby the change log:
 -- 
+-- 2017-03-07: GROUP:**HandleEvent( Event, EventFunction )** added.  
+-- 2017-03-07: GROUP:**UnHandleEvent( Event )** added.
+-- 
 -- 2017-01-24: GROUP:**SetAIOnOff( AIOnOff )** added.  
 -- 
 -- 2017-01-24: GROUP:**SetAIOn()** added.  
@@ -110,7 +113,7 @@ GROUP = {
 -- @param Dcs.DCSWrapper.Group#Group GroupName The DCS Group name
 -- @return #GROUP self
 function GROUP:Register( GroupName )
-  local self = BASE:Inherit( self, CONTROLLABLE:New( GroupName ) )
+  self = BASE:Inherit( self, CONTROLLABLE:New( GroupName ) )
   self:F2( GroupName )
   self.GroupName = GroupName
   
@@ -184,7 +187,7 @@ function GROUP:IsAlive()
   local DCSGroup = self:GetDCSObject()
 
   if DCSGroup then
-    local GroupIsAlive = DCSGroup:isExist()
+    local GroupIsAlive = DCSGroup:isExist() and DCSGroup:getUnit(1) ~= nil
     self:T3( GroupIsAlive )
     return GroupIsAlive
   end
@@ -228,7 +231,7 @@ function GROUP:GetCategory()
   return nil
 end
 
---- Returns the category name of the DCS Group.
+--- Returns the category name of the #GROUP.
 -- @param #GROUP self
 -- @return #string Category name = Helicopter, Airplane, Ground Unit, Ship
 function GROUP:GetCategoryName()
@@ -455,8 +458,7 @@ function GROUP:IsCompletelyInZone( Zone )
   
   for UnitID, UnitData in pairs( self:GetUnits() ) do
     local Unit = UnitData -- Wrapper.Unit#UNIT
-    -- TODO: Rename IsPointVec3InZone to IsVec3InZone
-    if Zone:IsPointVec3InZone( Unit:GetVec3() ) then
+    if Zone:IsVec3InZone( Unit:GetVec3() ) then
     else
       return false
     end
@@ -474,7 +476,7 @@ function GROUP:IsPartlyInZone( Zone )
   
   for UnitID, UnitData in pairs( self:GetUnits() ) do
     local Unit = UnitData -- Wrapper.Unit#UNIT
-    if Zone:IsPointVec3InZone( Unit:GetVec3() ) then
+    if Zone:IsVec3InZone( Unit:GetVec3() ) then
       return true
     end
   end
@@ -491,7 +493,7 @@ function GROUP:IsNotInZone( Zone )
   
   for UnitID, UnitData in pairs( self:GetUnits() ) do
     local Unit = UnitData -- Wrapper.Unit#UNIT
-    if Zone:IsPointVec3InZone( Unit:GetVec3() ) then
+    if Zone:IsVec3InZone( Unit:GetVec3() ) then
       return false
     end
   end
@@ -898,4 +900,55 @@ function GROUP:OnReSpawn( ReSpawnFunction )
   self.ReSpawnFunction = ReSpawnFunction
 end
 
+do -- Event Handling
 
+  --- Subscribe to a DCS Event.
+  -- @param #GROUP self
+  -- @param Core.Event#EVENTS Event
+  -- @param #function EventFunction (optional) The function to be called when the event occurs for the GROUP.
+  -- @return #GROUP
+  function GROUP:HandleEvent( Event, EventFunction )
+  
+    self:EventDispatcher():OnEventForGroup( self:GetName(), EventFunction, self, Event )
+    
+    return self
+  end
+  
+  --- UnSubscribe to a DCS event.
+  -- @param #GROUP self
+  -- @param Core.Event#EVENTS Event
+  -- @return #GROUP
+  function GROUP:UnHandleEvent( Event )
+  
+    self:EventDispatcher():RemoveForGroup( self:GetName(), self, Event )
+    
+    return self
+  end
+
+end
+
+do -- Players
+
+  --- Get player names
+  -- @param #GROUP self
+  -- @return #table The group has players, an array of player names is returned.
+  -- @return #nil The group has no players
+  function GROUP:GetPlayerNames()
+  
+    local PlayerNames = nil
+    
+    local Units = self:GetUnits()
+    for UnitID, UnitData in pairs( Units ) do
+      local Unit = UnitData -- Wrapper.Unit#UNIT
+      local PlayerName = Unit:GetPlayerName()
+      if PlayerName and PlayerName ~= "" then
+        PlayerNames = PlayerNames or {}
+        table.insert( PlayerNames, PlayerName )
+      end   
+    end
+    
+    self:F( PlayerNames )
+    return PlayerNames
+  end
+  
+end

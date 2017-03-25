@@ -39,17 +39,19 @@
 					<li><a href="Fsm.html">Fsm</a></li>
 					<li>Group</li>
 					<li><a href="Identifiable.html">Identifiable</a></li>
-					<li><a href="MOVEMENT.html">MOVEMENT</a></li>
 					<li><a href="Menu.html">Menu</a></li>
 					<li><a href="Message.html">Message</a></li>
 					<li><a href="MissileTrainer.html">MissileTrainer</a></li>
 					<li><a href="Mission.html">Mission</a></li>
+					<li><a href="Movement.html">Movement</a></li>
 					<li><a href="Object.html">Object</a></li>
 					<li><a href="Point.html">Point</a></li>
 					<li><a href="Positionable.html">Positionable</a></li>
 					<li><a href="Process_JTAC.html">Process_JTAC</a></li>
 					<li><a href="Process_Pickup.html">Process_Pickup</a></li>
+					<li><a href="Radio.html">Radio</a></li>
 					<li><a href="Route.html">Route</a></li>
+					<li><a href="Scenery.html">Scenery</a></li>
 					<li><a href="ScheduleDispatcher.html">ScheduleDispatcher</a></li>
 					<li><a href="Scheduler.html">Scheduler</a></li>
 					<li><a href="Scoring.html">Scoring</a></li>
@@ -60,8 +62,8 @@
 					<li><a href="Static.html">Static</a></li>
 					<li><a href="Task.html">Task</a></li>
 					<li><a href="Task_A2G.html">Task_A2G</a></li>
+					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_PICKUP.html">Task_PICKUP</a></li>
-					<li><a href="Task_SEAD.html">Task_SEAD</a></li>
 					<li><a href="Unit.html">Unit</a></li>
 					<li><a href="Utils.html">Utils</a></li>
 					<li><a href="Zone.html">Zone</a></li>
@@ -161,6 +163,9 @@ Use the following Zone validation methods on the group:</p>
 
 <p>Hereby the change log:</p>
 
+<p>2017-03-07: GROUP:<strong>HandleEvent( Event, EventFunction )</strong> added. <br/>
+2017-03-07: GROUP:<strong>UnHandleEvent( Event )</strong> added.</p>
+
 <p>2017-01-24: GROUP:<strong>SetAIOnOff( AIOnOff )</strong> added.  </p>
 
 <p>2017-01-24: GROUP:<strong>SetAIOn()</strong> added.  </p>
@@ -258,7 +263,7 @@ Use the following Zone validation methods on the group:</p>
 		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(GROUP).GetCategoryName">GROUP:GetCategoryName()</a></td>
 		<td class="summary">
-<p>Returns the category name of the DCS Group.</p>
+<p>Returns the category name of the #GROUP.</p>
 </td>
 		</tr>
 		<tr>
@@ -315,6 +320,12 @@ Use the following Zone validation methods on the group:</p>
 		<td class="name" nowrap="nowrap"><a href="##(GROUP).GetMinHeight">GROUP:GetMinHeight()</a></td>
 		<td class="summary">
 <p>Returns the current minimum height of the group.</p>
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(GROUP).GetPlayerNames">GROUP:GetPlayerNames()</a></td>
+		<td class="summary">
+<p>Get player names</p>
 </td>
 		</tr>
 		<tr>
@@ -375,6 +386,12 @@ Use the following Zone validation methods on the group:</p>
 		<td class="name" nowrap="nowrap"><a href="##(GROUP).GroupName">GROUP.GroupName</a></td>
 		<td class="summary">
 <p>The name of the group.</p>
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(GROUP).HandleEvent">GROUP:HandleEvent(Event, EventFunction)</a></td>
+		<td class="summary">
+<p>Subscribe to a DCS Event.</p>
 </td>
 		</tr>
 		<tr>
@@ -489,6 +506,12 @@ Use the following Zone validation methods on the group:</p>
 		<td class="name" nowrap="nowrap"><a href="##(GROUP).SetTemplateCountry">GROUP:SetTemplateCountry(CountryID, Template)</a></td>
 		<td class="summary">
 <p>Sets the CountryID of the group in a Template.</p>
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(GROUP).UnHandleEvent">GROUP:UnHandleEvent(Event)</a></td>
+		<td class="summary">
+<p>UnSubscribe to a DCS event.</p>
 </td>
 		</tr>
 	</table>
@@ -732,7 +755,7 @@ The category ID</p>
 </dt>
 <dd>
 	
-<p>Returns the category name of the DCS Group.</p>
+<p>Returns the category name of the #GROUP.</p>
 
 		<h3>Return value</h3>
 				
@@ -942,6 +965,34 @@ Minimum height found.</p>
 		<dl class="function">
 <dt>
 
+<a id="#(GROUP).GetPlayerNames" >
+<strong>GROUP:GetPlayerNames()</strong>
+</a>
+</dt>
+<dd>
+	
+<p>Get player names</p>
+
+		<h3>Return values</h3>
+			<ol>
+				<li>
+				
+<p><em>#table:</em>
+The group has players, an array of player names is returned.</p>
+
+				</li>
+				<li>
+				
+<p><em>#nil:</em>
+The group has no players</p>
+
+				</li>
+			</ol>
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
 <a id="#(GROUP).GetPositionVec3" >
 <strong>GROUP:GetPositionVec3()</strong>
 </a>
@@ -1137,6 +1188,38 @@ Current Vec3 of the first DCS Unit of the GROUP.</p>
 <dd>
 	
 <p>The name of the group.</p>
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(GROUP).HandleEvent" >
+<strong>GROUP:HandleEvent(Event, EventFunction)</strong>
+</a>
+</dt>
+<dd>
+	
+<p>Subscribe to a DCS Event.</p>
+
+		<h3>Parameters</h3>
+		<ul>
+				<li>
+				
+<p><code><em><a href="Core.Event.html##(EVENTS)">Core.Event#EVENTS</a> Event </em></code>: </p>
+
+				</li>
+				<li>
+				
+<p><code><em>#function EventFunction </em></code>: 
+(optional) The function to be called when the event occurs for the GROUP.</p>
+
+				</li>
+		</ul>
+		<h3>Return value</h3>
+				
+<p><em><a href="##(GROUP)">#GROUP</a>:</em></p>
+
 
 </dd>
 </dl>
@@ -1610,6 +1693,32 @@ The country ID.</p>
 		<h3>Return value</h3>
 				
 <p><em>#table:</em></p>
+
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(GROUP).UnHandleEvent" >
+<strong>GROUP:UnHandleEvent(Event)</strong>
+</a>
+</dt>
+<dd>
+	
+<p>UnSubscribe to a DCS event.</p>
+
+		<h3>Parameter</h3>
+		<ul>
+				<li>
+				
+<p><code><em><a href="Core.Event.html##(EVENTS)">Core.Event#EVENTS</a> Event </em></code>: </p>
+
+				</li>
+		</ul>
+		<h3>Return value</h3>
+				
+<p><em><a href="##(GROUP)">#GROUP</a>:</em></p>
 
 
 </dd>

@@ -39,17 +39,19 @@
 					<li><a href="Fsm.html">Fsm</a></li>
 					<li><a href="Group.html">Group</a></li>
 					<li><a href="Identifiable.html">Identifiable</a></li>
-					<li><a href="MOVEMENT.html">MOVEMENT</a></li>
 					<li><a href="Menu.html">Menu</a></li>
 					<li>Message</li>
 					<li><a href="MissileTrainer.html">MissileTrainer</a></li>
 					<li><a href="Mission.html">Mission</a></li>
+					<li><a href="Movement.html">Movement</a></li>
 					<li><a href="Object.html">Object</a></li>
 					<li><a href="Point.html">Point</a></li>
 					<li><a href="Positionable.html">Positionable</a></li>
 					<li><a href="Process_JTAC.html">Process_JTAC</a></li>
 					<li><a href="Process_Pickup.html">Process_Pickup</a></li>
+					<li><a href="Radio.html">Radio</a></li>
 					<li><a href="Route.html">Route</a></li>
+					<li><a href="Scenery.html">Scenery</a></li>
 					<li><a href="ScheduleDispatcher.html">ScheduleDispatcher</a></li>
 					<li><a href="Scheduler.html">Scheduler</a></li>
 					<li><a href="Scoring.html">Scoring</a></li>
@@ -60,8 +62,8 @@
 					<li><a href="Static.html">Static</a></li>
 					<li><a href="Task.html">Task</a></li>
 					<li><a href="Task_A2G.html">Task_A2G</a></li>
+					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_PICKUP.html">Task_PICKUP</a></li>
-					<li><a href="Task_SEAD.html">Task_SEAD</a></li>
 					<li><a href="Unit.html">Unit</a></li>
 					<li><a href="Utils.html">Utils</a></li>
 					<li><a href="Zone.html">Zone</a></li>
@@ -71,28 +73,48 @@
 	<div id="content">
    <h1>Module <code>Message</code></h1>
    
-<p>This module contains the MESSAGE class.</p>
+<p><strong>Core</strong> - MESSAGE class takes are of the <strong>real-time notifications</strong> and <strong>messages to players</strong> during a simulation.</p>
 
    
 
+<p><img src="..\Presentations\MESSAGE\Dia1.JPG" alt="Banner Image"/></p>
+
+<hr/>
+
 <h1>1) <a href="Message.html##(MESSAGE)">Message#MESSAGE</a> class, extends <a href="Base.html##(BASE)">Base#BASE</a></h1>
+
 <p>Message System to display Messages to Clients, Coalitions or All.
 Messages are shown on the display panel for an amount of seconds, and will then disappear.
 Messages can contain a category which is indicating the category of the message.</p>
 
-<h2>1.1) MESSAGE construction methods</h2>
+<h2>1.1) MESSAGE construction</h2>
+
 <p>Messages are created with <a href="Message.html##(MESSAGE).New">Message#MESSAGE.New</a>. Note that when the MESSAGE object is created, no message is sent yet.
 To send messages, you need to use the To functions.</p>
 
-<h2>1.2) Send messages with MESSAGE To methods</h2>
-<p>Messages are sent to:</p>
+<h2>1.2) Send messages to an audience</h2>
+
+<p>Messages are sent:</p>
 
 <ul>
-    <li>Clients with <a href="Message.html##(MESSAGE).ToClient">Message#MESSAGE.ToClient</a>.</li>
-    <li>Coalitions with <a href="Message.html##(MESSAGE).ToCoalition">Message#MESSAGE.ToCoalition</a>.</li>
-    <li>All Players with <a href="Message.html##(MESSAGE).ToAll">Message#MESSAGE.ToAll</a>.
-    </li>
+    <li>To a <a href="Client.html">Client</a> using <a href="Message.html##(MESSAGE).ToClient">Message#MESSAGE.ToClient</a>().</li>
+    <li>To a <a href="Group.html">Group</a> using <a href="Message.html##(MESSAGE).ToGroup">Message#MESSAGE.ToGroup</a>()</li>
+    <li>To a coalition using <a href="Message.html##(MESSAGE).ToCoalition">Message#MESSAGE.ToCoalition</a>().</li>
+    <li>To the red coalition using <a href="Message.html##(MESSAGE).ToRed">Message#MESSAGE.ToRed</a>().</li>
+    <li>To the blue coalition using <a href="Message.html##(MESSAGE).ToBlue">Message#MESSAGE.ToBlue</a>().</li>
+    <li>To all Players using <a href="Message.html##(MESSAGE).ToAll">Message#MESSAGE.ToAll</a>().</li>
 </ul>
+
+<h2>1.3) Send conditionally to an audience</h2>
+
+<p>Messages can be sent conditionally to an audience (when a condition is true):</p>
+
+<ul>
+    <li>To all players using <a href="Message.html##(MESSAGE).ToAllIf">Message#MESSAGE.ToAllIf</a>().</li>
+    <li>To a coalition using <a href="Message.html##(MESSAGE).ToCoalitionIf">Message#MESSAGE.ToCoalitionIf</a>().</li>
+</ul>
+
+
 
 	<h2>Global(s)</h2>
 	<table class="function_list">
@@ -136,6 +158,12 @@ To send messages, you need to use the To functions.</p>
 </td>
 		</tr>
 		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(MESSAGE).ToAllIf">MESSAGE:ToAllIf(Condition)</a></td>
+		<td class="summary">
+<p>Sends a MESSAGE to all players if the given Condition is true.</p>
+</td>
+		</tr>
+		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(MESSAGE).ToBlue">MESSAGE:ToBlue()</a></td>
 		<td class="summary">
 <p>Sends a MESSAGE to the Blue coalition.</p>
@@ -151,6 +179,12 @@ To send messages, you need to use the To functions.</p>
 		<td class="name" nowrap="nowrap"><a href="##(MESSAGE).ToCoalition">MESSAGE:ToCoalition(CoalitionSide)</a></td>
 		<td class="summary">
 <p>Sends a MESSAGE to a Coalition. </p>
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(MESSAGE).ToCoalitionIf">MESSAGE:ToCoalitionIf(CoalitionSide, Condition)</a></td>
+		<td class="summary">
+<p>Sends a MESSAGE to a Coalition if the given Condition is true. </p>
 </td>
 		</tr>
 		<tr>
@@ -314,6 +348,32 @@ MessageAll:ToAll()</code></pre>
 		<dl class="function">
 <dt>
 
+<a id="#(MESSAGE).ToAllIf" >
+<strong>MESSAGE:ToAllIf(Condition)</strong>
+</a>
+</dt>
+<dd>
+	
+<p>Sends a MESSAGE to all players if the given Condition is true.</p>
+
+		<h3>Parameter</h3>
+		<ul>
+				<li>
+				
+<p><code><em> Condition </em></code>: </p>
+
+				</li>
+		</ul>
+		<h3>Return value</h3>
+				
+<p><em><a href="##(MESSAGE)">#MESSAGE</a>:</em></p>
+
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
 <a id="#(MESSAGE).ToBlue" >
 <strong>MESSAGE:ToBlue()</strong>
 </a>
@@ -417,6 +477,38 @@ MESSAGE:New( "To the RED Players: You receive a penalty because you've killed on
 or
 MessageRED = MESSAGE:New( "To the RED Players: You receive a penalty because you've killed one of your own units", "Penalty", 25, "Score" )
 MessageRED:ToCoalition( coalition.side.RED )</code></pre>
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(MESSAGE).ToCoalitionIf" >
+<strong>MESSAGE:ToCoalitionIf(CoalitionSide, Condition)</strong>
+</a>
+</dt>
+<dd>
+	
+<p>Sends a MESSAGE to a Coalition if the given Condition is true. </p>
+
+		<h3>Parameters</h3>
+		<ul>
+				<li>
+				
+<p><code><em> CoalitionSide </em></code>: 
+needs to be filled out by the defined structure of the standard scripting engine <a href="coalition.side.html">coalition.side</a>. </p>
+
+				</li>
+				<li>
+				
+<p><code><em> Condition </em></code>: </p>
+
+				</li>
+		</ul>
+		<h3>Return value</h3>
+				
+<p><em><a href="##(MESSAGE)">#MESSAGE</a>:</em></p>
+
 
 </dd>
 </dl>

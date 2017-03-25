@@ -19,8 +19,6 @@ local.properties
 # External tool builders
 .externalToolBuilders/
 
-# Locally stored "Eclipse launch configurations"
-*.launch
 
 # CDT-specific
 .cproject
@@ -224,3 +222,4 @@ _gsdata_/
 #GITHUB
 .gitattributes
 .gitignore
+Moose Test Missions/MOOSE_Test_Template.miz

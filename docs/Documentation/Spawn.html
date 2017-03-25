@@ -39,17 +39,19 @@
 					<li><a href="Fsm.html">Fsm</a></li>
 					<li><a href="Group.html">Group</a></li>
 					<li><a href="Identifiable.html">Identifiable</a></li>
-					<li><a href="MOVEMENT.html">MOVEMENT</a></li>
 					<li><a href="Menu.html">Menu</a></li>
 					<li><a href="Message.html">Message</a></li>
 					<li><a href="MissileTrainer.html">MissileTrainer</a></li>
 					<li><a href="Mission.html">Mission</a></li>
+					<li><a href="Movement.html">Movement</a></li>
 					<li><a href="Object.html">Object</a></li>
 					<li><a href="Point.html">Point</a></li>
 					<li><a href="Positionable.html">Positionable</a></li>
 					<li><a href="Process_JTAC.html">Process_JTAC</a></li>
 					<li><a href="Process_Pickup.html">Process_Pickup</a></li>
+					<li><a href="Radio.html">Radio</a></li>
 					<li><a href="Route.html">Route</a></li>
+					<li><a href="Scenery.html">Scenery</a></li>
 					<li><a href="ScheduleDispatcher.html">ScheduleDispatcher</a></li>
 					<li><a href="Scheduler.html">Scheduler</a></li>
 					<li><a href="Scoring.html">Scoring</a></li>
@@ -60,8 +62,8 @@
 					<li><a href="Static.html">Static</a></li>
 					<li><a href="Task.html">Task</a></li>
 					<li><a href="Task_A2G.html">Task_A2G</a></li>
+					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_PICKUP.html">Task_PICKUP</a></li>
-					<li><a href="Task_SEAD.html">Task_SEAD</a></li>
 					<li><a href="Unit.html">Unit</a></li>
 					<li><a href="Utils.html">Utils</a></li>
 					<li><a href="Zone.html">Zone</a></li>
@@ -71,7 +73,7 @@
 	<div id="content">
    <h1>Module <code>Spawn</code></h1>
    
-<p>Single-Player:<strong>Yes</strong> / Mulit-Player:<strong>Yes</strong> / AI:<strong>Yes</strong> / Human:<strong>No</strong> / Types:<strong>All</strong> -- <br/>
+<p>Single-Player:<strong>Yes</strong> / Multi-Player:<strong>Yes</strong> / AI:<strong>Yes</strong> / Human:<strong>No</strong> / Types:<strong>All</strong> -- <br/>
 <strong>Spawn groups of units dynamically in your missions.</strong></p>
 
 <p><img src="..\Presentations\SPAWN\SPAWN.JPG" alt="Banner Image"/></p>
@@ -126,12 +128,14 @@ So in principle, the group list will contain all parameters and configurations a
 <p>A spawn object will behave differently based on the usage of <strong>initialization</strong> methods, which all start with the <strong>Init</strong> prefix:  </p>
 
 <ul>
+    <li><a href="##(SPAWN).InitKeepUnitNames">SPAWN.InitKeepUnitNames</a>(): Keeps the unit names as defined within the mission editor, but note that anything after a # mark is ignored, and any spaces before and after the resulting name are removed. IMPORTANT! This method MUST be the first used after :New !!!</li>
     <li><a href="##(SPAWN).InitLimit">SPAWN.InitLimit</a>(): Limits the amount of groups that can be alive at the same time and that can be dynamically spawned.</li>
     <li><a href="##(SPAWN).InitRandomizeRoute">SPAWN.InitRandomizeRoute</a>(): Randomize the routes of spawned groups, and for air groups also optionally the height.</li>
     <li><a href="##(SPAWN).InitRandomizeTemplate">SPAWN.InitRandomizeTemplate</a>(): Randomize the group templates so that when a new group is spawned, a random group template is selected from one of the templates defined. </li>
     <li><a href="##(SPAWN).InitUnControlled">SPAWN.InitUnControlled</a>(): Spawn plane groups uncontrolled.</li>
     <li><a href="##(SPAWN).InitArray">SPAWN.InitArray</a>(): Make groups visible before they are actually activated, and order these groups like a batallion in an array.</li>
     <li><a href="##(SPAWN).InitRepeat">SPAWN.InitRepeat</a>(): Re-spawn groups when they land at the home base. Similar methods are <a href="##(SPAWN).InitRepeatOnLanding">SPAWN.InitRepeatOnLanding</a> and <a href="##(SPAWN).InitRepeatOnEngineShutDown">SPAWN.InitRepeatOnEngineShutDown</a>.</li>
+    <li><a href="##(SPAWN).InitRandomizePosition">SPAWN.InitRandomizePosition</a>(): Randomizes the position of <a href="Group.html">Group</a>s that are spawned within a <strong>radius band</strong>, given an Outer and Inner radius, from the point that the spawn happens.</li>
     <li><a href="##(SPAWN).InitRandomizeUnits">SPAWN.InitRandomizeUnits</a>(): Randomizes the <a href="Unit.html">Unit</a>s in the <a href="Group.html">Group</a> that is spawned within a <strong>radius band</strong>, given an Outer and Inner radius.</li>
     <li><a href="##(SPAWN).InitRandomizeZones">SPAWN.InitRandomizeZones</a>(): Randomizes the spawning between a predefined list of <a href="Zone.html">Zone</a>s that are declared using this function. Each zone can be given a probability factor.</li>
     <li><a href="##(SPAWN).InitAIOn">SPAWN.InitAIOn</a>(): Turns the AI On when spawning the new <a href="Group.html">Group</a> object.</li>
@@ -205,6 +209,9 @@ A coding example is provided at the description of the <a href="##(SPAWN).OnSpaw
 </ul>
 
 <p>Hereby the change log:</p>
+
+<p>2017-03-14: SPAWN:<strong>InitKeepUnitNames()</strong> added. <br/>
+2017-03-14: SPAWN:<strong>InitRandomizePosition( RandomizePosition, OuterRadious, InnerRadius )</strong> added.</p>
 
 <p>2017-02-04: SPAWN:InitUnControlled( <strong>UnControlled</strong> ) replaces SPAWN:InitUnControlled().</p>
 
@@ -356,9 +363,23 @@ A coding example is provided at the description of the <a href="##(SPAWN).OnSpaw
 </td>
 		</tr>
 		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN).InitKeepUnitNames">SPAWN:InitKeepUnitNames()</a></td>
+		<td class="summary">
+<p>Keeps the unit names as defined within the mission editor, 
+but note that anything after a # mark is ignored, 
+and any spaces before and after the resulting name are removed.</p>
+</td>
+		</tr>
+		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(SPAWN).InitLimit">SPAWN:InitLimit(SpawnMaxUnitsAlive, SpawnMaxGroups)</a></td>
 		<td class="summary">
 <p>Limits the Maximum amount of Units that can be alive at the same time, and the maximum amount of groups that can be spawned.</p>
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN).InitRandomizePosition">SPAWN:InitRandomizePosition(RandomizePosition, OuterRadius, InnerRadius)</a></td>
+		<td class="summary">
+<p>Randomizes the position of <a href="Group.html">Group</a>s that are spawned within a <strong>radius band</strong>, given an Outer and Inner radius, from the point that the spawn happens.</p>
 </td>
 		</tr>
 		<tr>
@@ -554,6 +575,18 @@ A coding example is provided at the description of the <a href="##(SPAWN).OnSpaw
 </td>
 		</tr>
 		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN).SpawnInitKeepUnitNames">SPAWN.SpawnInitKeepUnitNames</a></td>
+		<td class="summary">
+
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN).SpawnInitLimit">SPAWN.SpawnInitLimit</a></td>
+		<td class="summary">
+
+</td>
+		</tr>
+		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(SPAWN).SpawnInnerRadius">SPAWN.SpawnInnerRadius</a></td>
 		<td class="summary">
 
@@ -585,6 +618,24 @@ A coding example is provided at the description of the <a href="##(SPAWN).OnSpaw
 		</tr>
 		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(SPAWN).SpawnRandomize">SPAWN.SpawnRandomize</a></td>
+		<td class="summary">
+
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN).SpawnRandomizePosition">SPAWN.SpawnRandomizePosition</a></td>
+		<td class="summary">
+
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN).SpawnRandomizePositionInnerRadius">SPAWN.SpawnRandomizePositionInnerRadius</a></td>
+		<td class="summary">
+
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN).SpawnRandomizePositionOuterRadius">SPAWN.SpawnRandomizePositionOuterRadius</a></td>
 		<td class="summary">
 
 </td>
@@ -722,25 +773,13 @@ A coding example is provided at the description of the <a href="##(SPAWN).OnSpaw
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._GetGroupFromDCSUnit">SPAWN:_GetGroupFromDCSUnit(DCSUnit)</a></td>
-		<td class="summary">
-<p>Return the group within the SpawnGroups collection with input a DCSUnit.</p>
-</td>
-		</tr>
-		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._GetGroupIndexFromDCSUnit">SPAWN:_GetGroupIndexFromDCSUnit(DCSUnit)</a></td>
-		<td class="summary">
-<p>Get the group index from a DCSUnit.</p>
-</td>
-		</tr>
-		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._GetLastIndex">SPAWN:_GetLastIndex()</a></td>
 		<td class="summary">
 <p>Return the last maximum index that can be used.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._GetPrefixFromDCSUnit">SPAWN:_GetPrefixFromDCSUnit(DCSUnit)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._GetPrefixFromGroup">SPAWN:_GetPrefixFromGroup(DCSUnit, SpawnGroup)</a></td>
 		<td class="summary">
 <p>Return the prefix of a SpawnUnit.</p>
 </td>
@@ -764,31 +803,31 @@ A coding example is provided at the description of the <a href="##(SPAWN).OnSpaw
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnBirth">SPAWN:_OnBirth(Event)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnBirth">SPAWN:_OnBirth(EventData)</a></td>
 		<td class="summary">
 
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnDeadOrCrash">SPAWN:_OnDeadOrCrash(Event)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnDeadOrCrash">SPAWN:_OnDeadOrCrash(EventData)</a></td>
 		<td class="summary">
 
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnEngineShutDown">SPAWN:_OnEngineShutDown(event)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnEngineShutDown">SPAWN:_OnEngineShutDown(EventData)</a></td>
 		<td class="summary">
 <p>Will detect AIR Units shutting down their engines ...</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnLand">SPAWN:_OnLand(event)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnLand">SPAWN:_OnLand(EventData)</a></td>
 		<td class="summary">
 <p>Will detect AIR Units landing...</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnTakeOff">SPAWN:_OnTakeOff(event)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(SPAWN)._OnTakeOff">SPAWN:_OnTakeOff(EventData)</a></td>
 		<td class="summary">
 <p>Will detect AIR Units taking off...</p>
 </td>
@@ -1240,6 +1279,29 @@ self</p>
 		<dl class="function">
 <dt>
 
+<a id="#(SPAWN).InitKeepUnitNames" >
+<strong>SPAWN:InitKeepUnitNames()</strong>
+</a>
+</dt>
+<dd>
+	
+<p>Keeps the unit names as defined within the mission editor, 
+but note that anything after a # mark is ignored, 
+and any spaces before and after the resulting name are removed.</p>
+
+	
+<p>IMPORTANT! This method MUST be the first used after :New !!!</p>
+
+		<h3>Return value</h3>
+				
+<p><em><a href="##(SPAWN)">#SPAWN</a>:</em>
+self</p>
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
 <a id="#(SPAWN).InitLimit" >
 <strong>SPAWN:InitLimit(SpawnMaxUnitsAlive, SpawnMaxGroups)</strong>
 </a>
@@ -1280,6 +1342,45 @@ self</p>
 -- This helicopter group consists of one Unit. So, this group will SPAWN maximum 2 groups simultaneously within the DCSRTE.
 -- There will be maximum 24 groups spawned during the whole mission lifetime. 
 Spawn_BE_KA50 = SPAWN:New( 'BE KA-50@RAMP-Ground Defense' ):InitLimit( 2, 24 )</code></pre>
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(SPAWN).InitRandomizePosition" >
+<strong>SPAWN:InitRandomizePosition(RandomizePosition, OuterRadius, InnerRadius)</strong>
+</a>
+</dt>
+<dd>
+	
+<p>Randomizes the position of <a href="Group.html">Group</a>s that are spawned within a <strong>radius band</strong>, given an Outer and Inner radius, from the point that the spawn happens.</p>
+
+		<h3>Parameters</h3>
+		<ul>
+				<li>
+				
+<p><code><em>#boolean RandomizePosition </em></code>: 
+If true, SPAWN will perform the randomization of the <a href="Group.html">Group</a>s position between a given outer and inner radius. </p>
+
+				</li>
+				<li>
+				
+<p><code><em><a href="Dcs.DCSTypes.html##(Distance)">Dcs.DCSTypes#Distance</a> OuterRadius </em></code>: 
+(optional) The outer radius in meters where the new group will be spawned.</p>
+
+				</li>
+				<li>
+				
+<p><code><em><a href="Dcs.DCSTypes.html##(Distance)">Dcs.DCSTypes#Distance</a> InnerRadius </em></code>: 
+(optional) The inner radius in meters where the new group will NOT be spawned.</p>
+
+				</li>
+		</ul>
+		<h3>Return value</h3>
+				
+<p><em><a href="##(SPAWN)">#SPAWN</a>:</em></p>
+
 
 </dd>
 </dl>
@@ -1758,9 +1859,6 @@ The group that was spawned. You can use this group for further actions.</p>
 	
 
 
-	
-<p> Don't repeat the group from Take-Off till Landing and back Take-Off by ReSpawning.</p>
-
 </dd>
 </dl>
 		<dl class="function">
@@ -2205,6 +2303,37 @@ when nothing was spawned.</p>
 		<dl class="function">
 <dt>
 
+		<em>#boolean</em>
+<a id="#(SPAWN).SpawnInitKeepUnitNames" >
+<strong>SPAWN.SpawnInitKeepUnitNames</strong>
+</a>
+</dt>
+<dd>
+	
+
+
+	
+<p> Overwrite unit names by default with group name.</p>
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+		<em>#boolean</em>
+<a id="#(SPAWN).SpawnInitLimit" >
+<strong>SPAWN.SpawnInitLimit</strong>
+</a>
+</dt>
+<dd>
+	
+
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
 <a id="#(SPAWN).SpawnInnerRadius" >
 <strong>SPAWN.SpawnInnerRadius</strong>
 </a>
@@ -2235,7 +2364,7 @@ when nothing was spawned.</p>
 		<dl class="function">
 <dt>
 
-		<em>#number</em>
+		<em></em>
 <a id="#(SPAWN).SpawnMaxGroups" >
 <strong>SPAWN.SpawnMaxGroups</strong>
 </a>
@@ -2252,7 +2381,7 @@ when nothing was spawned.</p>
 		<dl class="function">
 <dt>
 
-		<em>#number</em>
+		<em></em>
 <a id="#(SPAWN).SpawnMaxUnitsAlive" >
 <strong>SPAWN.SpawnMaxUnitsAlive</strong>
 </a>
@@ -2293,6 +2422,45 @@ when nothing was spawned.</p>
 
 	
 <p> Sets the randomization flag of new Spawned units to false.</p>
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(SPAWN).SpawnRandomizePosition" >
+<strong>SPAWN.SpawnRandomizePosition</strong>
+</a>
+</dt>
+<dd>
+	
+
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(SPAWN).SpawnRandomizePositionInnerRadius" >
+<strong>SPAWN.SpawnRandomizePositionInnerRadius</strong>
+</a>
+</dt>
+<dd>
+	
+
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(SPAWN).SpawnRandomizePositionOuterRadius" >
+<strong>SPAWN.SpawnRandomizePositionOuterRadius</strong>
+</a>
+</dt>
+<dd>
+	
+
 
 </dd>
 </dl>
@@ -2531,7 +2699,7 @@ Spawn_BE_KA50 = SPAWN:New( 'BE KA-50@RAMP-Ground Defense' ):Schedule( 600, 0.5 )
 		<dl class="function">
 <dt>
 
-		<em>#boolean</em>
+		<em></em>
 <a id="#(SPAWN).SpawnUnControlled" >
 <strong>SPAWN.SpawnUnControlled</strong>
 </a>
@@ -2686,84 +2854,6 @@ The group that was spawned. You can use this group for further actions.</p>
 		<dl class="function">
 <dt>
 
-<a id="#(SPAWN)._GetGroupFromDCSUnit" >
-<strong>SPAWN:_GetGroupFromDCSUnit(DCSUnit)</strong>
-</a>
-</dt>
-<dd>
-	
-<p>Return the group within the SpawnGroups collection with input a DCSUnit.</p>
-
-		<h3>Parameter</h3>
-		<ul>
-				<li>
-				
-<p><code><em><a href="Dcs.DCSWrapper.Unit.html##(Unit)">Dcs.DCSWrapper.Unit#Unit</a> DCSUnit </em></code>: 
-The <a href="DCSUnit.html">DCSUnit</a> to be searched.</p>
-
-				</li>
-		</ul>
-		<h3>Return values</h3>
-			<ol>
-				<li>
-				
-<p><em><a href="Wrapper.Group.html##(GROUP)">Wrapper.Group#GROUP</a>:</em>
-The Group</p>
-
-				</li>
-				<li>
-				
-<p><em>#nil:</em>
-Nothing found</p>
-
-				</li>
-			</ol>
-</dd>
-</dl>
-		<dl class="function">
-<dt>
-
-<a id="#(SPAWN)._GetGroupIndexFromDCSUnit" >
-<strong>SPAWN:_GetGroupIndexFromDCSUnit(DCSUnit)</strong>
-</a>
-</dt>
-<dd>
-	
-<p>Get the group index from a DCSUnit.</p>
-
-	
-<p>The method will search for a #-mark, and will return the index behind the #-mark of the DCSUnit.
-It will return nil of no prefix was found.</p>
-
-		<h3>Parameter</h3>
-		<ul>
-				<li>
-				
-<p><code><em><a href="Dcs.DCSWrapper.Unit.html##(Unit)">Dcs.DCSWrapper.Unit#Unit</a> DCSUnit </em></code>: 
-The <a href="DCSUnit.html">DCSUnit</a> to be searched.</p>
-
-				</li>
-		</ul>
-		<h3>Return values</h3>
-			<ol>
-				<li>
-				
-<p><em>#string:</em>
-The prefix</p>
-
-				</li>
-				<li>
-				
-<p><em>#nil:</em>
-Nothing found</p>
-
-				</li>
-			</ol>
-</dd>
-</dl>
-		<dl class="function">
-<dt>
-
 <a id="#(SPAWN)._GetLastIndex" >
 <strong>SPAWN:_GetLastIndex()</strong>
 </a>
@@ -2777,8 +2867,8 @@ Nothing found</p>
 		<dl class="function">
 <dt>
 
-<a id="#(SPAWN)._GetPrefixFromDCSUnit" >
-<strong>SPAWN:_GetPrefixFromDCSUnit(DCSUnit)</strong>
+<a id="#(SPAWN)._GetPrefixFromGroup" >
+<strong>SPAWN:_GetPrefixFromGroup(DCSUnit, SpawnGroup)</strong>
 </a>
 </dt>
 <dd>
@@ -2789,12 +2879,17 @@ Nothing found</p>
 <p>The method will search for a #-mark, and will return the text before the #-mark.
 It will return nil of no prefix was found.</p>
 
-		<h3>Parameter</h3>
+		<h3>Parameters</h3>
 		<ul>
 				<li>
 				
 <p><code><em><a href="Dcs.DCSWrapper.Unit.html##(UNIT)">Dcs.DCSWrapper.Unit#UNIT</a> DCSUnit </em></code>: 
 The <a href="DCSUnit.html">DCSUnit</a> to be searched.</p>
+
+				</li>
+				<li>
+				
+<p><code><em> SpawnGroup </em></code>: </p>
 
 				</li>
 		</ul>
@@ -2893,7 +2988,7 @@ Nothing found</p>
 <dt>
 
 <a id="#(SPAWN)._OnBirth" >
-<strong>SPAWN:_OnBirth(Event)</strong>
+<strong>SPAWN:_OnBirth(EventData)</strong>
 </a>
 </dt>
 <dd>
@@ -2904,7 +2999,7 @@ Nothing found</p>
 		<ul>
 				<li>
 				
-<p><code><em><a href="Core.Event.html##(EVENTDATA)">Core.Event#EVENTDATA</a> Event </em></code>: </p>
+<p><code><em><a href="Core.Event.html##(EVENTDATA)">Core.Event#EVENTDATA</a> EventData </em></code>: </p>
 
 				</li>
 		</ul>
@@ -2914,7 +3009,7 @@ Nothing found</p>
 <dt>
 
 <a id="#(SPAWN)._OnDeadOrCrash" >
-<strong>SPAWN:_OnDeadOrCrash(Event)</strong>
+<strong>SPAWN:_OnDeadOrCrash(EventData)</strong>
 </a>
 </dt>
 <dd>
@@ -2925,7 +3020,7 @@ Nothing found</p>
 		<ul>
 				<li>
 				
-<p><code><em><a href="Core.Event.html##(EVENTDATA)">Core.Event#EVENTDATA</a> Event </em></code>: </p>
+<p><code><em><a href="Core.Event.html##(EVENTDATA)">Core.Event#EVENTDATA</a> EventData </em></code>: </p>
 
 				</li>
 		</ul>
@@ -2935,7 +3030,7 @@ Nothing found</p>
 <dt>
 
 <a id="#(SPAWN)._OnEngineShutDown" >
-<strong>SPAWN:_OnEngineShutDown(event)</strong>
+<strong>SPAWN:_OnEngineShutDown(EventData)</strong>
 </a>
 </dt>
 <dd>
@@ -2950,7 +3045,7 @@ But only when the Unit was registered to have landed.</p>
 		<ul>
 				<li>
 				
-<p><code><em> event </em></code>: </p>
+<p><code><em><a href="Core.Event.html##(EVENTDATA)">Core.Event#EVENTDATA</a> EventData </em></code>: </p>
 
 				</li>
 		</ul>
@@ -2960,7 +3055,7 @@ But only when the Unit was registered to have landed.</p>
 <dt>
 
 <a id="#(SPAWN)._OnLand" >
-<strong>SPAWN:_OnLand(event)</strong>
+<strong>SPAWN:_OnLand(EventData)</strong>
 </a>
 </dt>
 <dd>
@@ -2975,7 +3070,7 @@ This is needed to ensure that Re-SPAWNing is only done for landed AIR Groups.</p
 		<ul>
 				<li>
 				
-<p><code><em> event </em></code>: </p>
+<p><code><em><a href="Core.Event.html##(EVENTDATA)">Core.Event#EVENTDATA</a> EventData </em></code>: </p>
 
 				</li>
 		</ul>
@@ -2985,7 +3080,7 @@ This is needed to ensure that Re-SPAWNing is only done for landed AIR Groups.</p
 <dt>
 
 <a id="#(SPAWN)._OnTakeOff" >
-<strong>SPAWN:_OnTakeOff(event)</strong>
+<strong>SPAWN:_OnTakeOff(EventData)</strong>
 </a>
 </dt>
 <dd>
@@ -3000,7 +3095,7 @@ This is needed to ensure that Re-SPAWNing only is done for landed AIR Groups.</p
 		<ul>
 				<li>
 				
-<p><code><em> event </em></code>: </p>
+<p><code><em><a href="Core.Event.html##(EVENTDATA)">Core.Event#EVENTDATA</a> EventData </em></code>: </p>
 
 				</li>
 		</ul>

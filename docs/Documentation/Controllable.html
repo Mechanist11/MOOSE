@@ -39,17 +39,19 @@
 					<li><a href="Fsm.html">Fsm</a></li>
 					<li><a href="Group.html">Group</a></li>
 					<li><a href="Identifiable.html">Identifiable</a></li>
-					<li><a href="MOVEMENT.html">MOVEMENT</a></li>
 					<li><a href="Menu.html">Menu</a></li>
 					<li><a href="Message.html">Message</a></li>
 					<li><a href="MissileTrainer.html">MissileTrainer</a></li>
 					<li><a href="Mission.html">Mission</a></li>
+					<li><a href="Movement.html">Movement</a></li>
 					<li><a href="Object.html">Object</a></li>
 					<li><a href="Point.html">Point</a></li>
 					<li><a href="Positionable.html">Positionable</a></li>
 					<li><a href="Process_JTAC.html">Process_JTAC</a></li>
 					<li><a href="Process_Pickup.html">Process_Pickup</a></li>
+					<li><a href="Radio.html">Radio</a></li>
 					<li><a href="Route.html">Route</a></li>
+					<li><a href="Scenery.html">Scenery</a></li>
 					<li><a href="ScheduleDispatcher.html">ScheduleDispatcher</a></li>
 					<li><a href="Scheduler.html">Scheduler</a></li>
 					<li><a href="Scoring.html">Scoring</a></li>
@@ -60,8 +62,8 @@
 					<li><a href="Static.html">Static</a></li>
 					<li><a href="Task.html">Task</a></li>
 					<li><a href="Task_A2G.html">Task_A2G</a></li>
+					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_PICKUP.html">Task_PICKUP</a></li>
-					<li><a href="Task_SEAD.html">Task_SEAD</a></li>
 					<li><a href="Unit.html">Unit</a></li>
 					<li><a href="Utils.html">Utils</a></li>
 					<li><a href="Zone.html">Zone</a></li>
@@ -107,7 +109,7 @@ This is different from the EnRoute tasks, where the targets of the task need to 
 <p>Find below a list of the <strong>assigned task</strong> methods:</p>
 
 <ul>
-    <li><a href="##(CONTROLLABLE).TaskAttackControllable">CONTROLLABLE.TaskAttackControllable</a>: (AIR) Attack a Controllable.</li>
+    <li><a href="##(CONTROLLABLE).TaskAttackGroup">CONTROLLABLE.TaskAttackGroup</a>: (AIR) Attack a Controllable.</li>
     <li><a href="##(CONTROLLABLE).TaskAttackMapObject">CONTROLLABLE.TaskAttackMapObject</a>: (AIR) Attacking the map object (building, structure, e.t.c).</li>
     <li><a href="##(CONTROLLABLE).TaskAttackUnit">CONTROLLABLE.TaskAttackUnit</a>: (AIR) Attack the Unit.</li>
     <li><a href="##(CONTROLLABLE).TaskBombing">CONTROLLABLE.TaskBombing</a>: (AIR) Delivering weapon at the point on the ground.</li>
@@ -115,7 +117,7 @@ This is different from the EnRoute tasks, where the targets of the task need to 
     <li><a href="##(CONTROLLABLE).TaskEmbarking">CONTROLLABLE.TaskEmbarking</a>: (AIR) Move the controllable to a Vec2 Point, wait for a defined duration and embark a controllable.</li>
     <li><a href="##(CONTROLLABLE).TaskEmbarkToTransport">CONTROLLABLE.TaskEmbarkToTransport</a>: (GROUND) Embark to a Transport landed at a location.</li>
     <li><a href="##(CONTROLLABLE).TaskEscort">CONTROLLABLE.TaskEscort</a>: (AIR) Escort another airborne controllable. </li>
-    <li><a href="##(CONTROLLABLE).TaskFAC_AttackControllable">CONTROLLABLE.TaskFAC_AttackControllable</a>: (AIR + GROUND) The task makes the controllable/unit a FAC and orders the FAC to control the target (enemy ground controllable) destruction.</li>
+    <li><a href="##(CONTROLLABLE).TaskFAC_AttackGroup">CONTROLLABLE.TaskFAC_AttackGroup</a>: (AIR + GROUND) The task makes the controllable/unit a FAC and orders the FAC to control the target (enemy ground controllable) destruction.</li>
     <li><a href="##(CONTROLLABLE).TaskFireAtPoint">CONTROLLABLE.TaskFireAtPoint</a>: (GROUND) Fire some or all ammunition at a VEC2 point.</li>
     <li><a href="##(CONTROLLABLE).TaskFollow">CONTROLLABLE.TaskFollow</a>: (AIR) Following another airborne controllable.</li>
     <li><a href="##(CONTROLLABLE).TaskHold">CONTROLLABLE.TaskHold</a>: (GROUND) Hold ground controllable from moving.</li>
@@ -232,6 +234,12 @@ This is different from the EnRoute tasks, where the targets of the task need to 
 </td>
 		</tr>
 		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).ClearTasks">CONTROLLABLE:ClearTasks()</a></td>
+		<td class="summary">
+<p>Clear all tasks from the controllable.</p>
+</td>
+		</tr>
+		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).CommandDoScript">CONTROLLABLE:CommandDoScript(DoScript)</a></td>
 		<td class="summary">
 <p>Do Script command</p>
@@ -294,7 +302,7 @@ This is different from the EnRoute tasks, where the targets of the task need to 
 		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).EnRouteTaskEngageUnit">CONTROLLABLE:EnRouteTaskEngageUnit(EngageUnit, Priority, GroupAttack, WeaponExpend, AttackQty, Direction, Altitude, Visible, ControllableAttack)</a></td>
 		<td class="summary">
-<p>(AIR) Attack the Unit.</p>
+<p>(AIR) Search and attack the Unit.</p>
 </td>
 		</tr>
 		<tr>
@@ -485,6 +493,18 @@ A speed can be given in km/h.</p>
 </td>
 		</tr>
 		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).RouteToVec2">CONTROLLABLE:RouteToVec2(Point, Speed)</a></td>
+		<td class="summary">
+<p>(AIR + GROUND) Make the Controllable move to fly to a given point.</p>
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).RouteToVec3">CONTROLLABLE:RouteToVec3(Point, Speed)</a></td>
+		<td class="summary">
+<p>(AIR + GROUND) Make the Controllable move to a given point.</p>
+</td>
+		</tr>
+		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).SetCommand">CONTROLLABLE:SetCommand(DCSCommand)</a></td>
 		<td class="summary">
 <p>Executes a command action</p>
@@ -509,7 +529,7 @@ A speed can be given in km/h.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).TaskAttackUnit">CONTROLLABLE:TaskAttackUnit(AttackUnit, WeaponType, WeaponExpend, AttackQty, Direction, AttackQtyLimit, ControllableAttack)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).TaskAttackUnit">CONTROLLABLE:TaskAttackUnit(AttackUnit, GroupAttack, WeaponExpend, AttackQty, Direction, Altitude, Visible, WeaponType)</a></td>
 		<td class="summary">
 <p>(AIR) Attack the Unit.</p>
 </td>
@@ -641,18 +661,6 @@ A speed can be given in km/h.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).TaskRouteToVec2">CONTROLLABLE:TaskRouteToVec2(Point, Speed)</a></td>
-		<td class="summary">
-<p>(AIR + GROUND) Make the Controllable move to fly to a given point.</p>
-</td>
-		</tr>
-		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).TaskRouteToVec3">CONTROLLABLE:TaskRouteToVec3(Point, Speed)</a></td>
-		<td class="summary">
-<p>(AIR + GROUND) Make the Controllable move to a given point.</p>
-</td>
-		</tr>
-		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(CONTROLLABLE).TaskRouteToZone">CONTROLLABLE:TaskRouteToZone(Zone, Randomize, Speed, Formation)</a></td>
 		<td class="summary">
 <p>(AIR + GROUND) Route the controllable to a given zone.</p>
@@ -734,6 +742,24 @@ A speed can be given in km/h.</p>
 </dt>
 <dd>
 	
+
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(CONTROLLABLE).ClearTasks" >
+<strong>CONTROLLABLE:ClearTasks()</strong>
+</a>
+</dt>
+<dd>
+	
+<p>Clear all tasks from the controllable.</p>
+
+		<h3>Return value</h3>
+				
+<p><em><a href="##(CONTROLLABLE)">#CONTROLLABLE</a>:</em></p>
 
 
 </dd>
@@ -1010,7 +1036,7 @@ All en-route tasks have the priority parameter. This is a number (less value - h
 				<li>
 				
 <p><code><em>#boolean AttackQtyLimit </em></code>: 
-(optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackControllable" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.</p>
+(optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackGroup" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.</p>
 
 				</li>
 		</ul>
@@ -1069,7 +1095,7 @@ The DCS task structure.</p>
 </dt>
 <dd>
 	
-<p>(AIR) Attack the Unit.</p>
+<p>(AIR) Search and attack the Unit.</p>
 
 		<h3>Parameters</h3>
 		<ul>
@@ -1865,6 +1891,72 @@ The route</p>
 		<dl class="function">
 <dt>
 
+<a id="#(CONTROLLABLE).RouteToVec2" >
+<strong>CONTROLLABLE:RouteToVec2(Point, Speed)</strong>
+</a>
+</dt>
+<dd>
+	
+<p>(AIR + GROUND) Make the Controllable move to fly to a given point.</p>
+
+		<h3>Parameters</h3>
+		<ul>
+				<li>
+				
+<p><code><em><a href="Dcs.DCSTypes.html##(Vec3)">Dcs.DCSTypes#Vec3</a> Point </em></code>: 
+The destination point in Vec3 format.</p>
+
+				</li>
+				<li>
+				
+<p><code><em>#number Speed </em></code>: 
+The speed to travel.</p>
+
+				</li>
+		</ul>
+		<h3>Return value</h3>
+				
+<p><em><a href="##(CONTROLLABLE)">#CONTROLLABLE</a>:</em>
+self</p>
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(CONTROLLABLE).RouteToVec3" >
+<strong>CONTROLLABLE:RouteToVec3(Point, Speed)</strong>
+</a>
+</dt>
+<dd>
+	
+<p>(AIR + GROUND) Make the Controllable move to a given point.</p>
+
+		<h3>Parameters</h3>
+		<ul>
+				<li>
+				
+<p><code><em><a href="Dcs.DCSTypes.html##(Vec3)">Dcs.DCSTypes#Vec3</a> Point </em></code>: 
+The destination point in Vec3 format.</p>
+
+				</li>
+				<li>
+				
+<p><code><em>#number Speed </em></code>: 
+The speed to travel.</p>
+
+				</li>
+		</ul>
+		<h3>Return value</h3>
+				
+<p><em><a href="##(CONTROLLABLE)">#CONTROLLABLE</a>:</em>
+self</p>
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
 <a id="#(CONTROLLABLE).SetCommand" >
 <strong>CONTROLLABLE:SetCommand(DCSCommand)</strong>
 </a>
@@ -1971,7 +2063,7 @@ The Controllable to be attacked.</p>
 				<li>
 				
 <p><code><em>#boolean AttackQtyLimit </em></code>: 
-(optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackControllable" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.</p>
+(optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackGroup" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.</p>
 
 				</li>
 		</ul>
@@ -2043,7 +2135,7 @@ The DCS task structure.</p>
 <dt>
 
 <a id="#(CONTROLLABLE).TaskAttackUnit" >
-<strong>CONTROLLABLE:TaskAttackUnit(AttackUnit, WeaponType, WeaponExpend, AttackQty, Direction, AttackQtyLimit, ControllableAttack)</strong>
+<strong>CONTROLLABLE:TaskAttackUnit(AttackUnit, GroupAttack, WeaponExpend, AttackQty, Direction, Altitude, Visible, WeaponType)</strong>
 </a>
 </dt>
 <dd>
@@ -2055,13 +2147,13 @@ The DCS task structure.</p>
 				<li>
 				
 <p><code><em><a href="Wrapper.Unit.html##(UNIT)">Wrapper.Unit#UNIT</a> AttackUnit </em></code>: 
-The unit.</p>
+The UNIT.</p>
 
 				</li>
 				<li>
 				
-<p><code><em>#number WeaponType </em></code>: 
-(optional) Bitmask of weapon types those allowed to use. If parameter is not defined that means no limits on weapon usage.</p>
+<p><code><em>#boolean GroupAttack </em></code>: 
+(optional) If true, all units in the group will attack the Unit when found.</p>
 
 				</li>
 				<li>
@@ -2084,14 +2176,20 @@ The unit.</p>
 				</li>
 				<li>
 				
-<p><code><em>#boolean AttackQtyLimit </em></code>: 
-(optional) The flag determines how to interpret attackQty parameter. If the flag is true then attackQty is a limit on maximal attack quantity for "AttackControllable" and "AttackUnit" tasks. If the flag is false then attackQty is a desired attack quantity for "Bombing" and "BombingRunway" tasks.</p>
+<p><code><em>#number Altitude </em></code>: 
+(optional) The altitude from where to attack.</p>
 
 				</li>
 				<li>
 				
-<p><code><em>#boolean ControllableAttack </em></code>: 
-(optional) Flag indicates that the target must be engaged by all aircrafts of the controllable. Has effect only if the task is assigned to a controllable, not to a single aircraft.</p>
+<p><code><em>#boolean Visible </em></code>: 
+(optional) not a clue.</p>
+
+				</li>
+				<li>
+				
+<p><code><em>#number WeaponType </em></code>: 
+(optional) The WeaponType.</p>
 
 				</li>
 		</ul>
@@ -2136,7 +2234,7 @@ The DCS task structure.</p>
 				<li>
 				
 <p><code><em>#number AttackQty </em></code>: 
-(optional) Desired quantity of passes. The parameter is not the same in AttackControllable and AttackUnit tasks. </p>
+(optional) Desired quantity of passes. The parameter is not the same in AttackGroup and AttackUnit tasks. </p>
 
 				</li>
 				<li>
@@ -2888,72 +2986,6 @@ A table of route points.</p>
 				
 <p><em><a href="Dcs.DCSTasking.Task.html##(Task)">Dcs.DCSTasking.Task#Task</a>:</em></p>
 
-
-</dd>
-</dl>
-		<dl class="function">
-<dt>
-
-<a id="#(CONTROLLABLE).TaskRouteToVec2" >
-<strong>CONTROLLABLE:TaskRouteToVec2(Point, Speed)</strong>
-</a>
-</dt>
-<dd>
-	
-<p>(AIR + GROUND) Make the Controllable move to fly to a given point.</p>
-
-		<h3>Parameters</h3>
-		<ul>
-				<li>
-				
-<p><code><em><a href="Dcs.DCSTypes.html##(Vec3)">Dcs.DCSTypes#Vec3</a> Point </em></code>: 
-The destination point in Vec3 format.</p>
-
-				</li>
-				<li>
-				
-<p><code><em>#number Speed </em></code>: 
-The speed to travel.</p>
-
-				</li>
-		</ul>
-		<h3>Return value</h3>
-				
-<p><em><a href="##(CONTROLLABLE)">#CONTROLLABLE</a>:</em>
-self</p>
-
-</dd>
-</dl>
-		<dl class="function">
-<dt>
-
-<a id="#(CONTROLLABLE).TaskRouteToVec3" >
-<strong>CONTROLLABLE:TaskRouteToVec3(Point, Speed)</strong>
-</a>
-</dt>
-<dd>
-	
-<p>(AIR + GROUND) Make the Controllable move to a given point.</p>
-
-		<h3>Parameters</h3>
-		<ul>
-				<li>
-				
-<p><code><em><a href="Dcs.DCSTypes.html##(Vec3)">Dcs.DCSTypes#Vec3</a> Point </em></code>: 
-The destination point in Vec3 format.</p>
-
-				</li>
-				<li>
-				
-<p><code><em>#number Speed </em></code>: 
-The speed to travel.</p>
-
-				</li>
-		</ul>
-		<h3>Return value</h3>
-				
-<p><em><a href="##(CONTROLLABLE)">#CONTROLLABLE</a>:</em>
-self</p>
 
 </dd>
 </dl>

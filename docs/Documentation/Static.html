@@ -39,17 +39,19 @@
 					<li><a href="Fsm.html">Fsm</a></li>
 					<li><a href="Group.html">Group</a></li>
 					<li><a href="Identifiable.html">Identifiable</a></li>
-					<li><a href="MOVEMENT.html">MOVEMENT</a></li>
 					<li><a href="Menu.html">Menu</a></li>
 					<li><a href="Message.html">Message</a></li>
 					<li><a href="MissileTrainer.html">MissileTrainer</a></li>
 					<li><a href="Mission.html">Mission</a></li>
+					<li><a href="Movement.html">Movement</a></li>
 					<li><a href="Object.html">Object</a></li>
 					<li><a href="Point.html">Point</a></li>
 					<li><a href="Positionable.html">Positionable</a></li>
 					<li><a href="Process_JTAC.html">Process_JTAC</a></li>
 					<li><a href="Process_Pickup.html">Process_Pickup</a></li>
+					<li><a href="Radio.html">Radio</a></li>
 					<li><a href="Route.html">Route</a></li>
+					<li><a href="Scenery.html">Scenery</a></li>
 					<li><a href="ScheduleDispatcher.html">ScheduleDispatcher</a></li>
 					<li><a href="Scheduler.html">Scheduler</a></li>
 					<li><a href="Scoring.html">Scoring</a></li>
@@ -60,8 +62,8 @@
 					<li>Static</li>
 					<li><a href="Task.html">Task</a></li>
 					<li><a href="Task_A2G.html">Task_A2G</a></li>
+					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_PICKUP.html">Task_PICKUP</a></li>
-					<li><a href="Task_SEAD.html">Task_SEAD</a></li>
 					<li><a href="Unit.html">Unit</a></li>
 					<li><a href="Utils.html">Utils</a></li>
 					<li><a href="Zone.html">Zone</a></li>
@@ -124,13 +126,19 @@ If the DCS Static object does not exist or is nil, the STATIC methods will retur
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(STATIC).FindByName">STATIC:FindByName(StaticName)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(STATIC).FindByName">STATIC:FindByName(StaticName, RaiseError)</a></td>
 		<td class="summary">
 <p>Finds a STATIC from the _DATABASE using the relevant Static Name.</p>
 </td>
 		</tr>
 		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(STATIC).GetDCSObject">STATIC:GetDCSObject()</a></td>
+		<td class="summary">
+
+</td>
+		</tr>
+		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(STATIC).GetThreatLevel">STATIC:GetThreatLevel()</a></td>
 		<td class="summary">
 
 </td>
@@ -189,7 +197,7 @@ If the DCS Static object does not exist or is nil, the STATIC methods will retur
 <dt>
 
 <a id="#(STATIC).FindByName" >
-<strong>STATIC:FindByName(StaticName)</strong>
+<strong>STATIC:FindByName(StaticName, RaiseError)</strong>
 </a>
 </dt>
 <dd>
@@ -199,12 +207,18 @@ If the DCS Static object does not exist or is nil, the STATIC methods will retur
 	
 <p>As an optional parameter, a briefing text can be given also.</p>
 
-		<h3>Parameter</h3>
+		<h3>Parameters</h3>
 		<ul>
 				<li>
 				
 <p><code><em>#string StaticName </em></code>: 
 Name of the DCS <strong>Static</strong> as defined within the Mission Editor.</p>
+
+				</li>
+				<li>
+				
+<p><code><em>#boolean RaiseError </em></code>: 
+Raise an error if not found.</p>
 
 				</li>
 		</ul>
@@ -220,6 +234,19 @@ Name of the DCS <strong>Static</strong> as defined within the Mission Editor.</p
 
 <a id="#(STATIC).GetDCSObject" >
 <strong>STATIC:GetDCSObject()</strong>
+</a>
+</dt>
+<dd>
+	
+
+
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(STATIC).GetThreatLevel" >
+<strong>STATIC:GetThreatLevel()</strong>
 </a>
 </dt>
 <dd>

@@ -171,7 +171,7 @@ function MISSILETRAINER:New( Distance, Briefing )
 
   self.Distance = Distance / 1000
 
-  _EVENTDISPATCHER:OnShot( self._EventShot, self )
+  self:HandleEvent( EVENTS.Shot )
 
   self.DBClients = SET_CLIENT:New():FilterStart()
 
@@ -449,14 +449,14 @@ end
 
 --- Detects if an SA site was shot with an anti radiation missile. In this case, take evasive actions based on the skill level set within the ME.
 -- @param #MISSILETRAINER self
--- @param Core.Event#EVENTDATA Event
-function MISSILETRAINER:_EventShot( Event )
-  self:F( { Event } )
+-- @param Core.Event#EVENTDATA EventData
+function MISSILETRAINER:OnEventShot( EVentData )
+  self:F( { EVentData } )
 
-  local TrainerSourceDCSUnit = Event.IniDCSUnit
-  local TrainerSourceDCSUnitName = Event.IniDCSUnitName
-  local TrainerWeapon = Event.Weapon -- Identify the weapon fired
-  local TrainerWeaponName = Event.WeaponName	-- return weapon type
+  local TrainerSourceDCSUnit = EVentData.IniDCSUnit
+  local TrainerSourceDCSUnitName = EVentData.IniDCSUnitName
+  local TrainerWeapon = EVentData.Weapon -- Identify the weapon fired
+  local TrainerWeaponName = EVentData.WeaponName	-- return weapon type
 
   self:T( "Missile Launched = " .. TrainerWeaponName )
 
@@ -501,9 +501,8 @@ function MISSILETRAINER:_EventShot( Event )
     end
   else
      -- TODO: some weapons don't know the target unit... Need to develop a workaround for this.
-    SCHEDULER:New( TrainerWeapon, TrainerWeapon.destroy, {}, 2 )
-		if ( TrainerWeapon:getTypeName() == "9M311" ) then
-		SCHEDULER:New( TrainerWeapon, TrainerWeapon.destroy, {}, 2 )
+ if ( TrainerWeapon:getTypeName() == "9M311" ) then
+		SCHEDULER:New( TrainerWeapon, TrainerWeapon.destroy, {}, 1 )
 		else
 		end
   end

@@ -1,10 +1,54 @@
---- Single-Player:**Yes** / Mulit-Player:**Yes** / AI:**Yes** / Human:**No** / Types:**Air** -- **Execute Combat Air Patrol (CAP).**
+--- **AI** - **Execute Combat Air Patrol (CAP).**
 --
 -- ![Banner Image](..\Presentations\AI_CAP\Dia1.JPG)
 -- 
 -- ===
+-- 
+-- AI CAP classes makes AI Controllables execute a Combat Air Patrol.
+-- 
+-- There are the following types of CAP classes defined:
+-- 
+--   * @{#AI_CAP_ZONE}: Perform a CAP in a zone.
+--   
+-- ====
 --
--- # 1) @{#AI_CAP_ZONE} class, extends @{AI_CAP#AI_PATROL_ZONE}
+-- # **API CHANGE HISTORY**
+--
+-- The underlying change log documents the API changes. Please read this carefully. The following notation is used:
+--
+--   * **Added** parts are expressed in bold type face.
+--   * _Removed_ parts are expressed in italic type face.
+--
+-- Hereby the change log:
+--
+-- 2017-01-15: Initial class and API.
+--
+-- ===
+--
+-- # **AUTHORS and CONTRIBUTIONS**
+--
+-- ### Contributions:
+--
+--   * **[Quax](https://forums.eagle.ru/member.php?u=90530)**: Concept, Advice & Testing.
+--   * **[Pikey](https://forums.eagle.ru/member.php?u=62835)**: Concept, Advice & Testing.
+--   * **[Gunterlund](http://forums.eagle.ru:8080/member.php?u=75036)**: Test case revision.
+--   * **[Whisper](http://forums.eagle.ru/member.php?u=3829): Testing.
+--   * **[Delta99](https://forums.eagle.ru/member.php?u=125166): Testing. 
+--        
+-- ### Authors:
+--
+--   * **FlightControl**: Concept, Design & Programming.
+--
+-- @module AI_Cap
+
+
+--- @type AI_CAP_ZONE
+-- @field Wrapper.Controllable#CONTROLLABLE AIControllable The @{Controllable} patrolling.
+-- @field Core.Zone#ZONE_BASE TargetZone The @{Zone} where the patrol needs to be executed.
+-- @extends AI.AI_Patrol#AI_PATROL_ZONE
+
+
+--- # 1) @{#AI_CAP_ZONE} class, extends @{AI_CAP#AI_PATROL_ZONE}
 -- 
 -- The @{#AI_CAP_ZONE} class implements the core functions to patrol a @{Zone} by an AI @{Controllable} or @{Group} 
 -- and automatically engage any airborne enemies that are within a certain range or within a certain zone.
@@ -54,12 +98,15 @@
 -- 
 -- ### 1.2.2) AI_CAP_ZONE Events
 -- 
---   * **Start** ( Group ): Start the process.
---   * **Route** ( Group ): Route the AI to a new random 3D point within the Patrol Zone.
---   * **Engage** ( Group ): Let the AI engage the bogeys.
---   * **RTB** ( Group ): Route the AI to the home base.
---   * **Detect** ( Group ): The AI is detecting targets.
---   * **Detected** ( Group ): The AI has detected new targets.
+--   * **@{AI_Patrol#AI_PATROL_ZONE.Start}**: Start the process.
+--   * **@{AI_Patrol#AI_PATROL_ZONE.Route}**: Route the AI to a new random 3D point within the Patrol Zone.
+--   * **@{#AI_CAP_ZONE.Engage}**: Let the AI engage the bogeys.
+--   * **@{#AI_CAP_ZONE.Abort}**: Aborts the engagement and return patrolling in the patrol zone.
+--   * **@{AI_Patrol#AI_PATROL_ZONE.RTB}**: Route the AI to the home base.
+--   * **@{AI_Patrol#AI_PATROL_ZONE.Detect}**: The AI is detecting targets.
+--   * **@{AI_Patrol#AI_PATROL_ZONE.Detected}**: The AI has detected new targets.
+--   * **@{#AI_CAP_ZONE.Destroy}**: The AI has destroyed a bogey @{Unit}.
+--   * **@{#AI_CAP_ZONE.Destroyed}**: The AI has destroyed all bogeys @{Unit}s assigned in the CAS task.
 --   * **Status** ( Group ): The AI is checking status (fuel and damage). When the tresholds have been reached, the AI will RTB.
 --
 -- ## 1.3) Set the Range of Engagement
@@ -79,44 +126,11 @@
 -- An optional @{Zone} can be set, 
 -- that will define when the AI will engage with the detected airborne enemy targets.
 -- Use the method @{AI_Cap#AI_CAP_ZONE.SetEngageZone}() to define that Zone.
---
--- ====
---
--- # **API CHANGE HISTORY**
---
--- The underlying change log documents the API changes. Please read this carefully. The following notation is used:
---
---   * **Added** parts are expressed in bold type face.
---   * _Removed_ parts are expressed in italic type face.
---
--- Hereby the change log:
---
--- 2017-01-15: Initial class and API.
---
+--  
 -- ===
---
--- # **AUTHORS and CONTRIBUTIONS**
---
--- ### Contributions:
---
---   * **[Quax](https://forums.eagle.ru/member.php?u=90530)**: Concept, Advice & Testing.
---   * **[Pikey](https://forums.eagle.ru/member.php?u=62835)**: Concept, Advice & Testing.
---   * **[Gunterlund](http://forums.eagle.ru:8080/member.php?u=75036)**: Test case revision.
---   * **[Whisper](http://forums.eagle.ru/member.php?u=3829): Testing.
---   * **[Delta99](https://forums.eagle.ru/member.php?u=125166): Testing. 
---        
--- ### Authors:
---
---   * **FlightControl**: Concept, Design & Programming.
---
--- @module AI_Cap
-
-
---- AI_CAP_ZONE class
--- @type AI_CAP_ZONE
--- @field Wrapper.Controllable#CONTROLLABLE AIControllable The @{Controllable} patrolling.
--- @field Core.Zone#ZONE_BASE TargetZone The @{Zone} where the patrol needs to be executed.
--- @extends AI.AI_Patrol#AI_PATROL_ZONE
+-- 
+-- @field #AI_CAP_ZONE AI_CAP_ZONE
+-- 
 AI_CAP_ZONE = {
   ClassName = "AI_CAP_ZONE",
 }
@@ -340,8 +354,11 @@ function AI_CAP_ZONE:onafterStart( Controllable, From, Event, To )
 
   -- Call the parent Start event handler
   self:GetParent(self).onafterStart( self, Controllable, From, Event, To )
+  self:HandleEvent( EVENTS.Dead )
 
 end
+
+-- todo: need to fix this global function
 
 --- @param Wrapper.Controllable#CONTROLLABLE AIControllable
 function _NewEngageCapRoute( AIControllable )
@@ -390,6 +407,18 @@ function AI_CAP_ZONE:onafterDetected( Controllable, From, Event, To )
     end
   end
 end
+
+
+--- @param #AI_CAP_ZONE self
+-- @param Wrapper.Controllable#CONTROLLABLE Controllable The Controllable Object managed by the FSM.
+-- @param #string From The From State string.
+-- @param #string Event The Event string.
+-- @param #string To The To State string.
+function AI_CAP_ZONE:onafterAbort( Controllable, From, Event, To )
+  Controllable:ClearTasks()
+  self:__Route( 1 )
+end
+
 
 
 
@@ -505,14 +534,9 @@ end
 -- @param #string From The From State string.
 -- @param #string Event The Event string.
 -- @param #string To The To State string.
--- @param Core.Event#EVENTDATA EventData
-function AI_CAP_ZONE:onafterDestroy( Controllable, From, Event, To, EventData )
-
-  if EventData.IniUnit then
-    self.DetectedUnits[EventData.IniUnit] = nil
-  end
-  
-  Controllable:MessageToAll( "Destroyed a target", 15 , "Destroyed!" )
+function AI_CAP_ZONE:onafterAccomplish( Controllable, From, Event, To )
+  self.Accomplished = true
+  self:SetDetectionOff()
 end
 
 --- @param #AI_CAP_ZONE self
@@ -520,9 +544,22 @@ end
 -- @param #string From The From State string.
 -- @param #string Event The Event string.
 -- @param #string To The To State string.
-function AI_CAP_ZONE:onafterAccomplish( Controllable, From, Event, To )
-  self.Accomplished = true
-  self:SetDetectionOff()
+-- @param Core.Event#EVENTDATA EventData
+function AI_CAP_ZONE:onafterDestroy( Controllable, From, Event, To, EventData )
+
+  if EventData.IniUnit then
+    self.DetectedUnits[EventData.IniUnit] = nil
+  end
 end
 
+--- @param #AI_CAP_ZONE self
+-- @param Core.Event#EVENTDATA EventData
+function AI_CAP_ZONE:OnEventDead( EventData )
+  self:F( { "EventDead", EventData } )
 
+  if EventData.IniDCSUnit then
+    if self.DetectedUnits and self.DetectedUnits[EventData.IniUnit] then
+      self:__Destroy( 1, EventData )
+    end
+  end
+end
