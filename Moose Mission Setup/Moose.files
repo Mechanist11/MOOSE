@@ -40,6 +40,7 @@ AI/AI_Patrol.lua
 AI/AI_Cap.lua
 AI/AI_Cas.lua
 AI/AI_Cargo.lua
+AI/AI_Zone_Invasion.lua
 
 Actions/Act_Assign.lua
 Actions/Act_Route.lua
