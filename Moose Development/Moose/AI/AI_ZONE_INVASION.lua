@@ -1,146 +1,141 @@
---- AI_ZONE_INVASION
--- @module AI_Zone_Invasion
+--- AI_INVASION
+-- @module AI_Invasion
 
---- AI_ZONE_INVASION class
--- @type AI_ZONE_INVASION
+--- AI_INVASION class
+-- @type AI_INVASION
 -- @extends Core.Fsm#FSM_SET
-AI_ZONE_INVASION = {
-  ClassName = 'AI_ZONE_INVASION',
+AI_INVASION = {
+  ClassName = 'AI_INVASION',
   Zones = {},
 }
 
---- Creates a new AI_ZONE_INVASION obejct
--- @param #AI_ZONE_INVASION self
+--- Creates a new AI_INVASION obejct
+-- @param #AI_INVASION self
 -- @param #table Zones A table with all zonenames
--- @return #AI_ZONE_INVASION self
-function AI_ZONE_INVASION:New( Zones )
+-- @param #string Coalition The coalition this invasion is 
+-- @return #AI_INVASION self
+function AI_INVASION:New( Zones , Coalition )
 
+  BASE:T({"AI_INVASION: New for Zones ", Zones, Coalition})
   -- Inherits from BASE
   local self = BASE:Inherit( self, FSM_SET:New( SET_GROUP:New() ) )
   
+  self.Coalition = Coalition
+  
+  -- GroupSet
+  self.Groups = SET_GROUP:New():FilterCoalitions(self.Coalition):FilterStart()
+  
   -- Create extended zones
-  local ZoneNames = Zones or {}
-  local index = 0
-  for index, Name in pairs (ZoneNames) do
+  for index, ZoneData in pairs (Zones or {}) do
+    local Zone = ZoneData -- Core.Zone#ZONE_BASE
     
     local NewZone = ZONE:New( Name )
     NewZone.Coalition = Coalition or "neutral"
+    NewZone.Priority = 0.0
     NewZone.ThreadLevel = 0.0
-    
-    function NewZone:SetThreadLevel( value )
-      self.ThreadLevel = value
-    end
-    function NewZone:DecreaseThreadLevel( value )
-      if self.ThreadLevel - value < 0.0 then
-        self.ThreadLevel = 0
-      else
-        self.ThreadLevel = value - value
-      end
-    end
-    function NewZone:IncreaseThreadLevel( value )
-      self.ThreadLevel = value + value      
-    end
     
     self.SetZones[index] = NewZone
      
   end
   
-  --Create Transitions for the group Sets
+  --Create Transitions for the Invasion
   self:SetStartState( "None" )
   self:AddTransition( "*", "Monitor", "Monitoring" )
   self:AddTransition( "*", "Spawn", "Spawning" )
-  self:AddTransition( "Spawning", "Spawned", "Spawned" )
-  self:AddTransition( "*", "Destroy", "Destroying" )
+
 
   return self
 end
 
-
---- Adds a Zone to the Invasion
--- @param #AI_ZONE_INVASION self
--- @param #string ZoneName The name of the zone in the Mission Editor
--- @param #boolean IsSpawnZone (Optional)Set to true if starting the invasion should spawn groups in this zone.
--- @param #string Coalition (Optional) Coalition The coalition name "red","blue","neutral". Default is "neutral".
--- @param #double Probability (Optional) Probability This factor between 0 and 1 will determine the probability of a zone to be selected.
--- @return Returns the new zone object  
-function AI_ZONE_INVASION:SetSpawnZone( ZoneName )
-  BASE:E({"AI_ZONE_INVASION: Setting SpawnZone to: " .. ZoneName })
+function AI_INVASION:SetZonePriority( ZoneName, Priority )
   
-  local NewZone = ZONE:New(ZoneName)
-  NewZone.IsInitZone = IsInitZone or false
-
-  
-  
-  self.Zones[#self.Zones+1] = NewZone
-  
-  if IsSpawnZone == true then
-    self.SpawnZones[#self.SpawnZones+1] = NewZone
+  local missionzone, index = self._FindZone( ZoneName )
+  if missionzone then
+    BASE:T({"AI_INVASION: Setting zone priority: " .. ZoneName,  priority})
+    self.Zones[index].Priority = Priority 
+  else
+    BASE:T({"AI_INVASION: Setting zone priority: Zone " .. ZoneName .. " not found!"})
   end
-
-  return NewZone
+  
 end
 
+--- Sets a Zone as SpawnZone
+-- @param #AI_INVASION self
+-- @param #string ZoneName The name of the zone in the Mission Editor
+function AI_INVASION:SetSpawnZone( ZoneName )
+  
+  BASE:T("AI_INVASION: Setting SpawnZone to: " .. ZoneName )
+  
+  local Zone = self:_FindZone( ZoneName )
+  
+  if Zone then
+   NewZone.IsSpawnZone = true 
+  end
+  
+end
 
 --- Adds Transport to the Invasion, wich then will transport the other groups ("Attackers", etc..) to their desintation zones
--- @param #AI_ZONE_INVASION self
--- @param #table Attackers A single String or a table of groupnames defined within the ME wich will act as transporters in the invasion. In case of a table the template will be randomized
-function AI_ZONE_INVASION:AddTransport( TransporterGroupNames )
+-- @param #AI_INVASION self
+-- @param #table TransporterGroupNames A single String or a table of groupnames defined within the ME wich will act as transporters in the invasion. In case of a table the template will be randomized
+function AI_INVASION:AddTransport( TransporterGroupNames )
   
-  BASE:E({"AI_ZONE_INVASION: AddTransports", TransporterGroupNames })
+  BASE:T({"AI_INVASION: AddTransports", TransporterGroupNames })
   local Transporters = TransporterGroupNames or {TransporterGroupNames} 
-  self.SpawnAttackers = SPAWN:New():InitRandomizeTemplate(Transporters)
+  self.SpawnTransporters = SPAWN:New():InitRandomizeTemplate(Transporters)
   
 end
 
 --- Adds a SPAWN object to the invasion.
--- @param #AI_ZONE_INVASION self
--- @param #table Attackers A single String or a table of groupnames defined within the ME wich will act as attackers in the invasion. In case of a table the template will be randomized
-function AI_ZONE_INVASION:AddAttackers( AttackerGroupNames )
+-- @param #AI_INVASION self
+-- @param #table AttackerGroupNames A single String or a table of groupnames defined within the ME wich will act as attackers in the invasion. In case of a table the template will be randomized
+function AI_INVASION:AddAttackers( AttackerGroupNames )
   
-  BASE:E({"AI_ZONE_INVASION: AddAttackers", AttackerGroupNames })
+  BASE:T({"AI_INVASION: AddAttackers", AttackerGroupNames })
   local Attackers = AttackerGroupNames or {AttackerGroupNames} 
   self.SpawnAttackers = SPAWN:New():InitRandomizeTemplate(Attackers)
   
 end
 
 --- Adds a SPAWN object to the invasion.
--- @param #AI_ZONE_INVASION self
--- @param #table Attackers A single String or a table of groupnames defined within the ME wich will act as defenders in the invasion. In case of a table the template will be randomized
-function AI_ZONE_INVASION:AddDefenders( DefenderGroupNames )
+-- @param #AI_INVASION self
+-- @param #table DefenderGroupNames A single String or a table of groupnames defined within the ME wich will act as defenders in the invasion. In case of a table the template will be randomized
+function AI_INVASION:AddDefenders( DefenderGroupNames )
   
-  BASE:E({"AI_ZONE_INVASION: AddAttackers", DefenderGroupNames })
+  BASE:T({"AI_INVASION: AddAttackers", DefenderGroupNames })
   local Defenders = DefenderGroupNames or {DefenderGroupNames} 
   self.SpawnDefenders = SPAWN:New():InitRandomizeTemplate(Defenders)
   
 end
 
---- @param #AI_ZONE_INVASION self
-function AI_ZONE_INVASION:Start()
+--- @param #AI_INVASION self
+function AI_INVASION:Start()
   BASE:E("AI Invasion start")  
-  self.InvasionScheduler = SCHEDULER:New(nil,
-    --- @param #AI_ZONE_INVASION
-    function( invasion )
-      if invasion.SpawnTransport ~= nil then
-        invasion:_SpawnTransport()
-      else
-        invasion:_SpawnGroup()
-      end
-       
-    end,
-    {self}, 10, 30  )
+
   self:__Monitor( 1 )
 end
 
 --- Stops the AI
--- @param #AI_ZONE_INVASION self
-function AI_ZONE_INVASION:Stop()
+-- @param #AI_INVASION self
+function AI_INVASION:Stop()
   BASE:E("AI Invasion stop")
   self.InvasionScheduler:Stop()
 end
 
+
+function AI_INVASION:_FindZone( ZoneName )
+
+  for i, zone in pairs ( self.Zones ) do
+    if zone:GetName() == ZoneName then
+      return zone, i
+    end
+  end
+  
+  return nil
+end
+
 --- Spawns a transport into the invasion
 -- @params self
-function AI_ZONE_INVASION:_SpawnTransport()
+function AI_INVASION:_SpawnTransport()
 
   local transporter = self.SpawnTransport:SpawnInZone( self.SpawnZones[16],true ) --math.random(#self.SpawnZones)
   
@@ -162,7 +157,7 @@ end
 
 --- Spawns a Group into the invasion
 -- @params self
-function AI_ZONE_INVASION:_SpawnGroup()
+function AI_INVASION:_SpawnGroup()
 
   for index,spawn in pairs( self.Spawns ) do
     zone = self.SpawnZones[math.random(#self.SpawnZones)]        
@@ -180,13 +175,10 @@ function AI_ZONE_INVASION:_SpawnGroup()
 
 end
 
-
-
-
 --- Set an aggressive FSM to the controllable
--- @param #AI_ZONE_INVASION self
+-- @param #AI_INVASION self
 -- @param Wrapper.Group#GROUP group 
-function AI_ZONE_INVASION:_SetFSM_Attack( group )
+function AI_INVASION:_SetFSM_Attack( group )
     
     local attackFSM = FSM_CONTROLLABLE:New(group)
     attackFSM:SetStartState("None")
@@ -195,5 +187,53 @@ function AI_ZONE_INVASION:_SetFSM_Attack( group )
     attackFSM:AddTransition("Moving","TaskComplete","Idle")
     attackFSM:AddTransition("*","Deactivating","None")
     
+    
+    return attackFSM
 end
 
+
+---
+-- @param #AI_INVATION self
+-- @param Core.Set#SET GroupSet
+-- @param From
+-- @param Event
+-- @param To
+function AI_INVASION:onenterMonitoring( GroupSet, From, Event, To )
+  
+  BASE:T("AI_INVASION: Monitoring")
+  --Check all zones and decrease the threadlevel if own troops are inside
+--  local zone = self.Zones
+--  self.GroupSet:ForEachGroup(
+--    --- @param Wrapper.Group#GROUP group
+--    function(group)
+--      
+--      for i, zone in pairs ( self.Zones ) do
+--        if group:IsCompletelyInZone(zone) then
+--          zone:DecreaseThreadLevel( #group:GetUnits() )
+--        end
+--      end
+--      
+--    end
+--  )
+  
+  self:__Monitor( -10 )
+end
+
+
+
+
+
+
+--- AI_INVASION_ZONE class
+-- @type AI_INVASION_ZONE
+-- @extends Core.Zones#ZONE
+AI_INVASION_ZONE = {
+  ClassName = 'AI_INVASION_ZONE',
+}
+
+
+function AI_INVASION_ZONE:New( ZoneName )
+  
+  BASE:T("AI_INVASION_ZONE: New")
+  
+end
