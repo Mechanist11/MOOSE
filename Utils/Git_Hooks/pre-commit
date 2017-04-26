@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# This hook script is called before every commit
+# It updates the previous commit hash in MOOSE\Moose Mission Setup\Moose.lua.
+
+hash=$(git rev-parse --verify HEAD)
+
+sed -i "/Moose Previous Commit/c \env.info( 'Moose Previous Commit : \\$hash' )" "./Moose Mission Setup/Moose.lua"
+echo hash = $hash
+echo hash updated in MOOSE\\Moose Mission Setup\\Moose.lua
