@@ -17,6 +17,11 @@
 				<a href="index.html">index</a>
 			</li></ul>
 		<ul>
+					<li><a href="AI_A2A.html">AI_A2A</a></li>
+					<li><a href="AI_A2A_Cap.html">AI_A2A_Cap</a></li>
+					<li><a href="AI_A2A_Dispatcher.html">AI_A2A_Dispatcher</a></li>
+					<li><a href="AI_A2A_GCI.html">AI_A2A_GCI</a></li>
+					<li><a href="AI_A2A_Patrol.html">AI_A2A_Patrol</a></li>
 					<li><a href="AI_Bai.html">AI_Bai</a></li>
 					<li><a href="AI_Balancer.html">AI_Balancer</a></li>
 					<li><a href="AI_Cap.html">AI_Cap</a></li>
@@ -75,6 +80,7 @@
 					<li><a href="Scoring.html">Scoring</a></li>
 					<li><a href="Sead.html">Sead</a></li>
 					<li><a href="Set.html">Set</a></li>
+					<li><a href="Settings.html">Settings</a></li>
 					<li><a href="Smoke.html">Smoke</a></li>
 					<li><a href="Spawn.html">Spawn</a></li>
 					<li><a href="SpawnStatic.html">SpawnStatic</a></li>
@@ -82,6 +88,8 @@
 					<li><a href="Static.html">Static</a></li>
 					<li><a href="StaticObject.html">StaticObject</a></li>
 					<li>Task</li>
+					<li><a href="Task_A2A.html">Task_A2A</a></li>
+					<li><a href="Task_A2A_Dispatcher.html">Task_A2A_Dispatcher</a></li>
 					<li><a href="Task_A2G.html">Task_A2G</a></li>
 					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_Cargo.html">Task_Cargo</a></li>
@@ -97,16 +105,17 @@
 	<div id="content">
    <h1>Module <code>Task</code></h1>
    
-<p><strong>Tasking</strong> -- This module contains the TASK class.</p>
+<p><strong>Tasking</strong> -- This module contains the TASK class, the main engine to run human taskings.</p>
 
    
 
 <hr/>
 
+<h3>Author: <strong>Sven Van de Velde (FlightControl)</strong></h3>
+
+<h3>Contributions:</h3>
 
 <hr/>
-
-<h3>Authors: FlightControl - Design and Programming</h3>
 
 
 	<h2>Global(s)</h2>
@@ -453,13 +462,13 @@
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK).ReportDetails">TASK:ReportDetails()</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK).ReportDetails">TASK:ReportDetails(TaskGroup, ReportGroup)</a></td>
 		<td class="summary">
 <p>Create a detailed report of the Task.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK).ReportOverview">TASK:ReportOverview()</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK).ReportOverview">TASK:ReportOverview(ReportGroup)</a></td>
 		<td class="summary">
 <p>Create an overiew report of the Task.</p>
 </td>
@@ -2007,7 +2016,7 @@ self</p>
 <dt>
 
 <a id="#(TASK).ReportDetails" >
-<strong>TASK:ReportDetails()</strong>
+<strong>TASK:ReportDetails(TaskGroup, ReportGroup)</strong>
 </a>
 </dt>
 <dd>
@@ -2017,6 +2026,19 @@ self</p>
 	
 <p>List the Task Status, and the Players assigned to the Task.</p>
 
+		<h3>Parameters</h3>
+		<ul>
+				<li>
+				
+<p><code><em><a href="Wrapper.Group.html##(GROUP)">Wrapper.Group#GROUP</a> TaskGroup </em></code>: </p>
+
+				</li>
+				<li>
+				
+<p><code><em> ReportGroup </em></code>: </p>
+
+				</li>
+		</ul>
 		<h3>Return value</h3>
 				
 <p><em>#string:</em></p>
@@ -2028,7 +2050,7 @@ self</p>
 <dt>
 
 <a id="#(TASK).ReportOverview" >
-<strong>TASK:ReportOverview()</strong>
+<strong>TASK:ReportOverview(ReportGroup)</strong>
 </a>
 </dt>
 <dd>
@@ -2038,6 +2060,14 @@ self</p>
 	
 <p>List the Task Name and Status</p>
 
+		<h3>Parameter</h3>
+		<ul>
+				<li>
+				
+<p><code><em> ReportGroup </em></code>: </p>
+
+				</li>
+		</ul>
 		<h3>Return value</h3>
 				
 <p><em>#string:</em></p>

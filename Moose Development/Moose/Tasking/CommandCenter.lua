@@ -1,5 +1,14 @@
---- A COMMANDCENTER is the owner of multiple missions within MOOSE. 
+--- **Tasking** -- A COMMANDCENTER is the owner of multiple missions within MOOSE. 
 -- A COMMANDCENTER governs multiple missions, the tasking and the reporting.
+-- 
+-- ===
+--  
+-- ### Author: **Sven Van de Velde (FlightControl)**
+-- 
+-- ### Contributions: 
+-- 
+-- ====
+-- 
 -- @module CommandCenter
 
 
@@ -26,6 +35,8 @@ function REPORT:New( Title )
   if Title then
     self.Title = Title  
   end
+  
+  self:SetIndent( 3 )
 
   return self
 end
@@ -83,13 +94,64 @@ end
 -- @field Dcs.DCSCoalitionWrapper.Object#coalition CommandCenterCoalition
 -- @list<Tasking.Mission#MISSION> Missions
 -- @extends Core.Base#BASE
+
+
+--- # COMMANDCENTER class, extends @{Base#BASE}
+-- 
+--  The COMMANDCENTER class governs multiple missions, the tasking and the reporting.
+--  
+--  The commandcenter communicates important messages between the various groups of human players executing tasks in missions.
+--  
+-- ## COMMANDCENTER constructor
+--
+--   * @{#COMMANDCENTER.New}(): Creates a new COMMANDCENTER object.
+-- 
+-- ## Mission Management
+-- 
+--   * @{#COMMANDCENTER.AddMission}(): Adds a mission to the commandcenter control.
+--   * @{#COMMANDCENTER.RemoveMission}(): Removes a mission to the commandcenter control.
+--   * @{#COMMANDCENTER.GetMissions}(): Retrieves the missions table controlled by the commandcenter.
+-- 
+-- ## Reference Zones
+-- 
+-- Command Centers may be aware of certain Reference Zones within the battleground. These Reference Zones can refer to
+-- known areas, recognizable buildings or sites, or any other point of interest.
+-- Command Centers will use these Reference Zones to help pilots with defining coordinates in terms of navigation
+-- during the WWII era.
+-- The Reference Zones are related to the WWII mode that the Command Center will operate in.
+-- Use the method @{#COMMANDCENTER.SetModeWWII}() to set the mode of communication to the WWII mode.
+-- 
+-- In WWII mode, the Command Center will receive detected targets, and will select for each target the closest
+-- nearby Reference Zone. This allows pilots to navigate easier through the battle field readying for combat.
+-- 
+-- The Reference Zones need to be set by the Mission Designer in the Mission Editor.
+-- Reference Zones are set by normal trigger zones. One can color the zones in a specific color, 
+-- and the radius of the zones doesn't matter, only the point is important. Place the center of these Reference Zones at
+-- specific scenery objects or points of interest (like cities, rivers, hills, crossing etc).
+-- The trigger zones indicating a Reference Zone need to follow a specific syntax.
+-- The name of each trigger zone expressing a Reference Zone need to start with a classification name of the object,
+-- followed by a #, followed by a symbolic name of the Reference Zone.
+-- A few examples:
+-- 
+--   * A church at Tskinvali would be indicated as: *Church#Tskinvali*
+--   * A train station near Kobuleti would be indicated as: *Station#Kobuleti*
+--   
+-- The COMMANDCENTER class contains a method to indicate which trigger zones need to be used as Reference Zones.
+-- This is done by using the method @{#COMMANDCENTER.SetReferenceZones}().
+-- For the moment, only one Reference Zone class can be specified, but in the future, more classes will become possible.
+-- 
+-- @field #COMMANDCENTER
 COMMANDCENTER = {
   ClassName = "COMMANDCENTER",
   CommandCenterName = "",
   CommandCenterCoalition = nil,
   CommandCenterPositionable = nil,
   Name = "",
+  ReferencePoints = {},
+  ReferenceNames = {},
+  CommunicationMode = "80",
 }
+
 --- The constructor takes an IDENTIFIABLE as the HQ command center.
 -- @param #COMMANDCENTER self
 -- @param Wrapper.Positionable#POSITIONABLE CommandCenterPositionable
@@ -116,13 +178,14 @@ function COMMANDCENTER:New( CommandCenterPositionable, CommandCenterName )
           local MenuMissionsSummary = MENU_GROUP_COMMAND:New( EventGroup, "Missions Status Report", MenuReporting, self.ReportMissionsStatus, self, EventGroup )
           local MenuMissionsDetails = MENU_GROUP_COMMAND:New( EventGroup, "Missions Players Report", MenuReporting, self.ReportMissionsPlayers, self, EventGroup )
           self:ReportSummary( EventGroup )
-        end
-        local PlayerUnit = EventData.IniUnit
-        for MissionID, Mission in pairs( self:GetMissions() ) do
-          local Mission = Mission -- Tasking.Mission#MISSION
-          local PlayerGroup = EventData.IniGroup -- The GROUP object should be filled!
-          Mission:JoinUnit( PlayerUnit, PlayerGroup )
-          Mission:ReportDetails()
+          local PlayerUnit = EventData.IniUnit
+          for MissionID, Mission in pairs( self:GetMissions() ) do
+            local Mission = Mission -- Tasking.Mission#MISSION
+            local PlayerGroup = EventData.IniGroup -- The GROUP object should be filled!
+            Mission:JoinUnit( PlayerUnit, PlayerGroup )
+          end
+          self:SetMenu()
+         _DATABASE:PlayerSettingsMenu( PlayerUnit ) 
         end
       end
       
@@ -143,7 +206,6 @@ function COMMANDCENTER:New( CommandCenterPositionable, CommandCenterName )
         local Mission = Mission -- Tasking.Mission#MISSION
         local PlayerGroup = EventData.IniGroup -- The GROUP object should be filled!
         Mission:JoinUnit( PlayerUnit, PlayerGroup )
-        Mission:ReportDetails()
       end
     end
   )
@@ -247,6 +309,66 @@ function COMMANDCENTER:RemoveMission( Mission )
 
   return Mission
 end
+
+--- Set special Reference Zones known by the Command Center to guide airborne pilots during WWII.
+-- 
+-- These Reference Zones are normal trigger zones, with a special naming.
+-- The Reference Zones need to be set by the Mission Designer in the Mission Editor.
+-- Reference Zones are set by normal trigger zones. One can color the zones in a specific color, 
+-- and the radius of the zones doesn't matter, only the center of the zone is important. Place the center of these Reference Zones at
+-- specific scenery objects or points of interest (like cities, rivers, hills, crossing etc).
+-- The trigger zones indicating a Reference Zone need to follow a specific syntax.
+-- The name of each trigger zone expressing a Reference Zone need to start with a classification name of the object,
+-- followed by a #, followed by a symbolic name of the Reference Zone.
+-- A few examples:
+-- 
+--   * A church at Tskinvali would be indicated as: *Church#Tskinvali*
+--   * A train station near Kobuleti would be indicated as: *Station#Kobuleti*
+-- 
+-- Taking the above example, this is how this method would be used:
+-- 
+--     CC:SetReferenceZones( "Church" )
+--     CC:SetReferenceZones( "Station" )
+-- 
+-- 
+-- @param #COMMANDCENTER self
+-- @param #string ReferenceZonePrefix The name before the #-mark indicating the class of the Reference Zones.
+-- @return #COMMANDCENTER
+function COMMANDCENTER:SetReferenceZones( ReferenceZonePrefix )
+  local MatchPattern = "(.*)#(.*)"
+  self:F( { MatchPattern = MatchPattern } )
+  for ReferenceZoneName in pairs( _DATABASE.ZONENAMES ) do
+    local ZoneName, ReferenceName = string.match( ReferenceZoneName, MatchPattern )
+    self:F( { ZoneName = ZoneName, ReferenceName = ReferenceName } )
+    if ZoneName and ReferenceName and ZoneName == ReferenceZonePrefix then
+      self.ReferencePoints[ReferenceZoneName] = ZONE:New( ReferenceZoneName )
+      self.ReferenceNames[ReferenceZoneName] = ReferenceName
+    end
+  end
+  return self
+end
+
+--- Set the commandcenter operations in WWII mode
+-- This will disable LL, MGRS, BRA, BULLS navigatin messages sent by the Command Center, 
+-- and will be replaced by a navigation using Reference Zones.
+-- It will also disable the settings at the settings menu for these.
+-- @param #COMMANDCENTER self
+-- @return #COMMANDCENTER
+function COMMANDCENTER:SetModeWWII()
+  self.CommunicationMode = "WWII"
+  return self
+end
+
+
+--- Returns if the commandcenter operations is in WWII mode
+-- @param #COMMANDCENTER self
+-- @return #boolean true if in WWII mode.
+function COMMANDCENTER:IsModeWWII()
+  return self.CommunicationMode == "WWII"
+end
+
+
+
 
 --- Sets the menu structure of the Missions governed by the HQ command center.
 -- @param #COMMANDCENTER self

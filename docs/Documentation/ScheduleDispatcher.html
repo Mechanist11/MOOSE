@@ -17,6 +17,11 @@
 				<a href="index.html">index</a>
 			</li></ul>
 		<ul>
+					<li><a href="AI_A2A.html">AI_A2A</a></li>
+					<li><a href="AI_A2A_Cap.html">AI_A2A_Cap</a></li>
+					<li><a href="AI_A2A_Dispatcher.html">AI_A2A_Dispatcher</a></li>
+					<li><a href="AI_A2A_GCI.html">AI_A2A_GCI</a></li>
+					<li><a href="AI_A2A_Patrol.html">AI_A2A_Patrol</a></li>
 					<li><a href="AI_Bai.html">AI_Bai</a></li>
 					<li><a href="AI_Balancer.html">AI_Balancer</a></li>
 					<li><a href="AI_Cap.html">AI_Cap</a></li>
@@ -75,6 +80,7 @@
 					<li><a href="Scoring.html">Scoring</a></li>
 					<li><a href="Sead.html">Sead</a></li>
 					<li><a href="Set.html">Set</a></li>
+					<li><a href="Settings.html">Settings</a></li>
 					<li><a href="Smoke.html">Smoke</a></li>
 					<li><a href="Spawn.html">Spawn</a></li>
 					<li><a href="SpawnStatic.html">SpawnStatic</a></li>
@@ -82,6 +88,8 @@
 					<li><a href="Static.html">Static</a></li>
 					<li><a href="StaticObject.html">StaticObject</a></li>
 					<li><a href="Task.html">Task</a></li>
+					<li><a href="Task_A2A.html">Task_A2A</a></li>
+					<li><a href="Task_A2A_Dispatcher.html">Task_A2A_Dispatcher</a></li>
 					<li><a href="Task_A2G.html">Task_A2G</a></li>
 					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_Cargo.html">Task_Cargo</a></li>
@@ -97,7 +105,7 @@
 	<div id="content">
    <h1>Module <code>ScheduleDispatcher</code></h1>
    
-<p>This module defines the SCHEDULEDISPATCHER class, which is used by a central object called _SCHEDULEDISPATCHER.</p>
+<p><strong>Core</strong> -- SCHEDULEDISPATCHER dispatches the different schedules.</p>
 
    
 
@@ -128,8 +136,6 @@ these will not be executed anymore when the SCHEDULER object has been destroyed.
 The SCHEDULER object therefore keeps a table of "CallID's", which are returned after each planning of a new scheduled function by the SCHEDULEDISPATCHER.
 The SCHEDULER object plans new scheduled functions through the <a href="Scheduler.html##(SCHEDULER).Schedule">Scheduler#SCHEDULER.Schedule</a>() method. 
 The Schedule() method returns the CallID that is the reference ID for each planned schedule.</p>
-
-<hr/>
 
 <hr/>
 
@@ -367,7 +373,8 @@ Nothing of this code should be modified without testing it thoroughly.</p>
 
 
 	
-<p> or {}</p>
+<p> Initialize the ObjectSchedulers array, which is a weakly coupled table.
+ If the object used as the key is nil, then the garbage collector will remove the item from the Functions array.</p>
 
 </dd>
 </dl>

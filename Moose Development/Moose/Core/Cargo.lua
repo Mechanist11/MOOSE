@@ -1,4 +1,4 @@
---- **(R2.1) Core** -- Management of CARGO logistics, that can be transported from and to transportation carriers.
+--- **Core** -- Management of CARGO logistics, that can be transported from and to transportation carriers.
 --
 -- ![Banner Image](..\Presentations\CARGO\Dia1.JPG)
 --
@@ -9,13 +9,15 @@
 --   * CARGO_UNIT, represented by a @{Unit} in a singleton @{Group}: Cargo can be represented by a Unit in a Group. a CARGO_UNIT is representable...
 --   * CARGO_GROUP, represented by a @{Group}. A CARGO_GROUP is reportable...
 --   
+-- This module is still under construction, but is described above works already, and will keep working ...
+-- 
 -- ====
 -- 
 -- # Demo Missions
 -- 
--- ### [CARGO Demo Missions source code]()
+-- ### [CARGO Demo Missions source code](https://github.com/FlightControl-Master/MOOSE_MISSIONS/tree/master-release/CGO%20-%20Cargo)
 -- 
--- ### [CARGO Demo Missions, only for beta testers]()
+-- ### [CARGO Demo Missions, only for beta testers](https://github.com/FlightControl-Master/MOOSE_MISSIONS/tree/master/CGO%20-%20Cargo)
 --
 -- ### [ALL Demo Missions pack of the last release](https://github.com/FlightControl-Master/MOOSE_MISSIONS/releases)
 -- 
@@ -23,11 +25,14 @@
 -- 
 -- # YouTube Channel
 -- 
--- ### [SPAWNSTATIC YouTube Channel]()
+-- ### [CARGO YouTube Channel](https://www.youtube.com/watch?v=tM00lTlkpYs&list=PL7ZUrU4zZUl2zUTuKrLW5RsO9zLMqUtbf)
 -- 
 -- ====
 -- 
--- This module is still under construction, but is described above works already, and will keep working ...
+-- ### Author: **Sven Van de Velde (FlightControl)**
+-- ### Contributions: 
+-- 
+-- ====
 -- 
 -- @module Cargo
 

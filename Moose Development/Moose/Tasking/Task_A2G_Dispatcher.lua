@@ -1,45 +1,12 @@
 --- **Tasking** - The TASK_A2G_DISPATCHER creates and manages player TASK_A2G tasks based on detected targets.
 -- 
--- ===
+-- ====
 -- 
--- # 1) @{#TASK_A2G_DISPATCHER} class, extends @{#DETECTION_MANAGER}
+-- ### Author: **Sven Van de Velde (FlightControl)**
 -- 
--- The @{#TASK_A2G_DISPATCHER} class implements the dynamic dispatching of tasks upon groups of detected units determined a @{Set} of FAC (groups).
--- The FAC will detect units, will group them, and will dispatch @{Task}s to groups. Depending on the type of target detected, different tasks will be dispatched.
--- Find a summary below describing for which situation a task type is created:
+-- ### Contributions: 
 -- 
---   * **CAS Task**: Is created when there are enemy ground units within range of the FAC, while there are friendly units in the FAC perimeter.
---   * **BAI Task**: Is created when there are enemy ground units within range of the FAC, while there are NO other friendly units within the FAC perimeter.
---   * **SEAD Task**: Is created when there are enemy ground units wihtin range of the FAC, with air search radars.
---   
--- Other task types will follow...
--- 
--- 3.1) TASK_A2G_DISPATCHER constructor:
--- --------------------------------------
--- The @{#TASK_A2G_DISPATCHER.New}() method creates a new TASK_A2G_DISPATCHER instance.
---    
--- ===
---
--- # **API CHANGE HISTORY**
---
--- The underlying change log documents the API changes. Please read this carefully. The following notation is used:
---
---   * **Added** parts are expressed in bold type face.
---   * _Removed_ parts are expressed in italic type face.
---
--- Hereby the change log:
---
--- 2017-03-09: Initial class and API.
---
--- ===
---
--- # **AUTHORS and CONTRIBUTIONS**
---
--- ### Contributions:
---        
--- ### Authors:
---
---   * **FlightControl**: Concept, Design & Programming.
+-- ====
 -- 
 -- @module Task_A2G_Dispatcher
 
@@ -51,6 +18,24 @@ do -- TASK_A2G_DISPATCHER
   -- @field Functional.Detection#DETECTION_BASE Detection The DETECTION_BASE object that is used to report the detected objects.
   -- @field Tasking.Mission#MISSION Mission
   -- @extends Tasking.DetectionManager#DETECTION_MANAGER
+
+  --- # TASK_A2G_DISPATCHE} class, extends @{#DETECTION_MANAGER}
+  -- 
+  -- The TASK_A2G_DISPATCHER class implements the dynamic dispatching of tasks upon groups of detected units determined a @{Set} of FAC (groups).
+  -- The FAC will detect units, will group them, and will dispatch @{Task}s to groups. Depending on the type of target detected, different tasks will be dispatched.
+  -- Find a summary below describing for which situation a task type is created:
+  -- 
+  --   * **CAS Task**: Is created when there are enemy ground units within range of the FAC, while there are friendly units in the FAC perimeter.
+  --   * **BAI Task**: Is created when there are enemy ground units within range of the FAC, while there are NO other friendly units within the FAC perimeter.
+  --   * **SEAD Task**: Is created when there are enemy ground units wihtin range of the FAC, with air search radars.
+  --   
+  -- Other task types will follow...
+  -- 
+  -- ## TASK_A2G_DISPATCHER constructor
+  -- 
+  -- The @{#TASK_A2G_DISPATCHER.New}() method creates a new TASK_A2G_DISPATCHER instance.
+  --
+  -- @field #TASK_A2G_DISPATCHER
   TASK_A2G_DISPATCHER = {
     ClassName = "TASK_A2G_DISPATCHER",
     Mission = nil,
@@ -185,13 +170,13 @@ do -- TASK_A2G_DISPATCHER
   -- @param #boolean DetectedItemID
   -- @param #boolean DetectedItemChange
   -- @return Tasking.Task#TASK
-  function TASK_A2G_DISPATCHER:EvaluateRemoveTask( Mission, Task, DetectedItemID, DetectedItemChanged )
+  function TASK_A2G_DISPATCHER:EvaluateRemoveTask( Mission, Task, TaskIndex, DetectedItemChanged )
     
     if Task then
       if Task:IsStatePlanned() and DetectedItemChanged == true then
-        self:E( "Removing Tasking: " .. Task:GetTaskName() )
+        --self:E( "Removing Tasking: " .. Task:GetTaskName() )
         Mission:RemoveTask( Task )
-        self.Tasks[DetectedItemID] = nil
+        self.Tasks[TaskIndex] = nil
       end
     end
     
@@ -216,60 +201,74 @@ do -- TASK_A2G_DISPATCHER
     
       local TaskReport = REPORT:New()
 
+      -- Checking the task queue for the dispatcher, and removing any obsolete task!
+      for TaskIndex, TaskData in pairs( self.Tasks ) do
+        local Task = TaskData -- Tasking.Task#TASK
+        if Task:IsStatePlanned() then
+          local DetectedItem = Detection:GetDetectedItem( TaskIndex )
+          if not DetectedItem then
+            local TaskText = Task:GetName()
+            for TaskGroupID, TaskGroup in pairs( self.SetGroup:GetSet() ) do
+              Mission:GetCommandCenter():MessageToGroup( string.format( "Obsolete A2G task %s for %s removed.", TaskText, Mission:GetName() ), TaskGroup )
+            end
+            Mission:RemoveTask( Task )
+            self.Tasks[TaskIndex] = nil
+          end
+        end
+      end
+
       --- First we need to  the detected targets.
       for DetectedItemID, DetectedItem in pairs( Detection:GetDetectedItems() ) do
       
         local DetectedItem = DetectedItem -- Functional.Detection#DETECTION_BASE.DetectedItem
         local DetectedSet = DetectedItem.Set -- Core.Set#SET_UNIT
         local DetectedZone = DetectedItem.Zone
-        self:E( { "Targets in DetectedItem", DetectedItem.ItemID, DetectedSet:Count(), tostring( DetectedItem ) } )
+        --self:E( { "Targets in DetectedItem", DetectedItem.ItemID, DetectedSet:Count(), tostring( DetectedItem ) } )
         DetectedSet:Flush()
         
         local DetectedItemID = DetectedItem.ID
-        local DetectedItemIndex = DetectedItem.Index
+        local TaskIndex = DetectedItem.Index
         local DetectedItemChanged = DetectedItem.Changed
         
-        local Task = self.Tasks[DetectedItemID]
-        Task = self:EvaluateRemoveTask( Mission, Task, DetectedItemID, DetectedItemChanged ) -- Task will be removed if it is planned and changed.
+        local Task = self.Tasks[TaskIndex]
+        Task = self:EvaluateRemoveTask( Mission, Task, TaskIndex, DetectedItemChanged ) -- Task will be removed if it is planned and changed.
 
         -- Evaluate SEAD
         if not Task then
           local TargetSetUnit = self:EvaluateSEAD( DetectedItem ) -- Returns a SetUnit if there are targets to be SEADed...
           if TargetSetUnit then
-            Task = TASK_SEAD:New( Mission, self.SetGroup, string.format( "SEAD.%03d", DetectedItemID ), TargetSetUnit )
+            Task = TASK_A2G_SEAD:New( Mission, self.SetGroup, string.format( "SEAD.%03d", DetectedItemID ), TargetSetUnit )
           end
 
           -- Evaluate CAS
           if not Task then
             local TargetSetUnit = self:EvaluateCAS( DetectedItem ) -- Returns a SetUnit if there are targets to be CASed...
             if TargetSetUnit then
-              Task = TASK_CAS:New( Mission, self.SetGroup, string.format( "CAS.%03d", DetectedItemID ), TargetSetUnit )
+              Task = TASK_A2G_CAS:New( Mission, self.SetGroup, string.format( "CAS.%03d", DetectedItemID ), TargetSetUnit )
             end
 
             -- Evaluate BAI
             if not Task then
               local TargetSetUnit = self:EvaluateBAI( DetectedItem, self.Mission:GetCommandCenter():GetPositionable():GetCoalition() ) -- Returns a SetUnit if there are targets to be BAIed...
               if TargetSetUnit then
-                Task = TASK_BAI:New( Mission, self.SetGroup, string.format( "BAI.%03d", DetectedItemID ), TargetSetUnit )
+                Task = TASK_A2G_BAI:New( Mission, self.SetGroup, string.format( "BAI.%03d", DetectedItemID ), TargetSetUnit )
               end
             end
           end
           
           if Task then
-            self.Tasks[DetectedItemID] = Task
+            self.Tasks[TaskIndex] = Task
             Task:SetTargetZone( DetectedZone )
             Task:SetDispatcher( self )
-            Task:SetInfo( "ThreatLevel", DetectedSet:CalculateThreatLevelA2G() )
-            Task:SetInfo( "Detection", Detection:DetectedItemReportSummary( DetectedItemIndex ) )
-            Task:SetInfo( "Changes", Detection:GetChangeText( DetectedItem ) )
             Mission:AddTask( Task )
+    
+            TaskReport:Add( Task:GetName() )
           else
             self:E("This should not happen")
           end
 
         end
 
-        TaskReport:Add( Task:GetName() )
   
         -- OK, so the tasking has been done, now delete the changes reported for the area.
         Detection:AcceptChanges( DetectedItem )

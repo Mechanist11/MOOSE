@@ -154,29 +154,54 @@ do -- ACT_ROUTE
   --- Get the routing text to be displayed.
   -- The route mode determines the text displayed.
   -- @param #ACT_ROUTE self
+  -- @param Wrapper.Controllable#CONTROLLABLE Controllable
   -- @return #string
-  function ACT_ROUTE:GetRouteText( FromCoordinate )
-
+  function ACT_ROUTE:GetRouteText( Controllable )
+    
+    self:E()
+    
     local RouteText = ""
 
-    if self.Coordinate and self.RouteMode == "B" then
-      RouteText = "Route to " .. FromCoordinate:GetBRText( self.Coordinate ) .. " km."
+    local Coordinate = nil -- Core.Point#COORDINATE
+    
+    if self.Coordinate then
+      Coordinate = self.Coordinate
     end
     
-    if self.Coordinate and self.RouteMode == "C" then
-      RouteText = "Route to " .. self.Coordinate:ToString()
+    if self.Zone then
+      Coordinate = self.Zone:GetPointVec3( self.Altitude )
+      Coordinate:SetHeading( self.Heading )
     end
     
-    if self.Zone and self.RouteMode == "B" then
-      local Coordinate = self.Zone:GetCoordinate()
-      RouteText = "Route to zone bearing " .. FromCoordinate:GetBRText( Coordinate ) .. " km."
+
+    local CC = self:GetTask():GetMission():GetCommandCenter()
+    if CC then
+      if CC:IsModeWWII() then
+        -- Find closest reference point to the target.
+        local ShortestDistance = 0
+        local ShortestReferencePoint = nil
+        local ShortestReferenceName = ""
+        self:E( { CC.ReferencePoints } )
+        for ZoneName, Zone in pairs( CC.ReferencePoints ) do
+          self:E( { ZoneName = ZoneName } )
+          local Zone = Zone -- Core.Zone#ZONE
+          local ZoneCoord = Zone:GetCoordinate()
+          local ZoneDistance = ZoneCoord:Get2DDistance( self.Coordinate )
+          self:E( { ShortestDistance, ShortestReferenceName } )
+          if ShortestDistance == 0 or ZoneDistance < ShortestDistance then
+            ShortestDistance = ZoneDistance
+            ShortestReferencePoint = ZoneCoord
+            ShortestReferenceName = CC.ReferenceNames[ZoneName]
+          end
+        end
+        if ShortestReferencePoint then
+          RouteText = Coordinate:ToStringFromRP( ShortestReferencePoint, ShortestReferenceName, Controllable )
+        end
+      else
+        RouteText = self.Coordinate:ToString( Controllable )
+      end
     end
 
-    if self.Zone and self.RouteMode == "C" then
-      local Coordinate = self.Zone:GetCoordinate()
-      RouteText = "Route to zone at " .. Coordinate:ToString()
-    end
-      
     return RouteText
   end
 
@@ -353,8 +378,7 @@ do -- ACT_ROUTE_POINT
   -- @param #string To
   function ACT_ROUTE_POINT:onafterReport( ProcessUnit, From, Event, To )
   
-    local TaskUnitCoordinate = ProcessUnit:GetCoordinate()
-    local RouteText = self:GetRouteText( TaskUnitCoordinate )
+    local RouteText = self:GetRouteText( ProcessUnit )
     self:Message( RouteText )
   end
 
@@ -403,8 +427,12 @@ do -- ACT_ROUTE_ZONE
   --- Set Zone
   -- @param #ACT_ROUTE_ZONE self
   -- @param Core.Zone#ZONE_BASE Zone The Zone object where to route to.
-  function ACT_ROUTE_ZONE:SetZone( Zone )
+  -- @param #number Altitude
+  -- @param #number Heading
+  function ACT_ROUTE_ZONE:SetZone( Zone, Altitude, Heading ) -- R2.2 Added altitude and heading
     self.Zone = Zone
+    self.Altitude = Altitude
+    self.Heading = Heading
   end  
 
   --- Get Zone
@@ -437,12 +465,9 @@ do -- ACT_ROUTE_ZONE
   -- @param #string From
   -- @param #string To
   function ACT_ROUTE_ZONE:onafterReport( ProcessUnit, From, Event, To )
+    self:E( { ProcessUnit = ProcessUnit } )
   
-    local ZoneVec2 = self.Zone:GetVec2()
-    local ZoneCoordinate = COORDINATE:New( ZoneVec2.x, ZoneVec2.y )
-    local TaskUnitVec2 = ProcessUnit:GetVec2()
-    local TaskUnitCoordinate = COORDINATE:New( TaskUnitVec2.x, TaskUnitVec2.y )
-    local RouteText = self:GetRouteText( TaskUnitCoordinate )
+    local RouteText = self:GetRouteText( ProcessUnit )
     self:Message( RouteText )
   end
 

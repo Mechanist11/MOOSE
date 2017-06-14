@@ -1,4 +1,4 @@
---- **Wrapper** -- GROUP is a wrapper class for the DCS Class Group.
+--- **Wrapper** -- GROUP wraps the DCS Class Group objects.
 -- 
 -- ===
 -- 
@@ -15,44 +15,21 @@
 -- 
 -- ====
 -- 
--- # **API CHANGE HISTORY**
--- 
--- The underlying change log documents the API changes. Please read this carefully. The following notation is used:
--- 
---   * **Added** parts are expressed in bold type face.
---   * _Removed_ parts are expressed in italic type face.
--- 
--- Hereby the change log:
--- 
--- 2017-03-26: GROUP:**RouteRTB( RTBAirbase, Speed )** added.  
--- 
--- 2017-03-07: GROUP:**HandleEvent( Event, EventFunction )** added.  
--- 2017-03-07: GROUP:**UnHandleEvent( Event )** added.
--- 
--- 2017-01-24: GROUP:**SetAIOnOff( AIOnOff )** added.  
--- 
--- 2017-01-24: GROUP:**SetAIOn()** added.  
--- 
--- 2017-01-24: GROUP:**SetAIOff()** added.  
--- 
--- ===
--- 
--- # **AUTHORS and CONTRIBUTIONS**
+-- ### Author: **Sven Van de Velde (FlightControl)**
 -- 
 -- ### Contributions: 
 -- 
 --   * [**Entropy**](https://forums.eagle.ru/member.php?u=111471), **Afinegan**: Came up with the requirement for AIOnOff().
 -- 
--- ### Authors: 
--- 
---   * **FlightControl**: Design & Programming
+-- ====
 -- 
 -- @module Group
--- @author FlightControl
+
 
 --- @type GROUP
 -- @extends Wrapper.Controllable#CONTROLLABLE
 -- @field #string GroupName The name of the group.
+
 
 --- 
 -- # GROUP class, extends @{Controllable#CONTROLLABLE}
@@ -112,6 +89,25 @@
 -- @field #GROUP GROUP
 GROUP = {
   ClassName = "GROUP",
+}
+
+
+--- Enumerator for location at airbases
+-- @type GROUP.Takeoff
+GROUP.Takeoff = {
+  Air = 1,
+  Runway = 2,
+  Hot = 3,
+  Cold = 4,
+}
+
+GROUPTEMPLATE = {}
+
+GROUPTEMPLATE.Takeoff = {
+  [GROUP.Takeoff.Air] =     "Turning Point",
+  [GROUP.Takeoff.Runway] =  "TakeOff",
+  [GROUP.Takeoff.Hot] =     "TakeOffParkingHot",
+  [GROUP.Takeoff.Cold] =    "TakeOffParking",
 }
 
 --- Create a new GROUP from a DCSGroup
@@ -426,6 +422,24 @@ function GROUP:GetTypeName()
   return nil
 end
 
+--- Gets the player name of the group.
+-- @param #GROUP self
+-- @return #string The player name of the group.
+function GROUP:GetPlayerName()
+  self:F2( self.GroupName )
+
+  local DCSGroup = self:GetDCSObject()
+
+  if DCSGroup then
+    local PlayerName = DCSGroup:getUnit(1):getPlayerName()
+    self:T3( PlayerName )
+    return( PlayerName )
+  end
+
+  return nil
+end
+
+
 --- Gets the CallSign of the first DCS Unit of the DCS Group.
 -- @param #GROUP self
 -- @return #string The CallSign of the first DCS Unit of the DCS Group.
@@ -484,6 +498,25 @@ function GROUP:GetPointVec2()
   
   return nil
 end
+
+--- Returns a COORDINATE object indicating the point of the first UNIT of the GROUP within the mission.
+-- @param Wrapper.Group#GROUP self
+-- @return Core.Point#COORDINATE The COORDINATE of the GROUP.
+-- @return #nil The POSITIONABLE is not existing or alive.  
+function GROUP:GetCoordinate()
+  self:F2( self.PositionableName )
+
+  local FirstUnit = self:GetUnit(1)
+  
+  if FirstUnit then
+    local FirstUnitCoordinate = FirstUnit:GetCoordinate()
+    self:T3(FirstUnitCoordinate)
+    return FirstUnitCoordinate
+  end
+  
+  return nil
+end
+
 
 --- Returns a random @{DCSTypes#Vec3} vector (point in 3D of the UNIT within the mission) within a range around the first UNIT of the GROUP.
 -- @param #GROUP self

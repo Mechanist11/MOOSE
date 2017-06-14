@@ -17,6 +17,11 @@
 				<a href="index.html">index</a>
 			</li></ul>
 		<ul>
+					<li><a href="AI_A2A.html">AI_A2A</a></li>
+					<li><a href="AI_A2A_Cap.html">AI_A2A_Cap</a></li>
+					<li><a href="AI_A2A_Dispatcher.html">AI_A2A_Dispatcher</a></li>
+					<li><a href="AI_A2A_GCI.html">AI_A2A_GCI</a></li>
+					<li><a href="AI_A2A_Patrol.html">AI_A2A_Patrol</a></li>
 					<li><a href="AI_Bai.html">AI_Bai</a></li>
 					<li><a href="AI_Balancer.html">AI_Balancer</a></li>
 					<li><a href="AI_Cap.html">AI_Cap</a></li>
@@ -75,6 +80,7 @@
 					<li><a href="Scoring.html">Scoring</a></li>
 					<li><a href="Sead.html">Sead</a></li>
 					<li><a href="Set.html">Set</a></li>
+					<li><a href="Settings.html">Settings</a></li>
 					<li><a href="Smoke.html">Smoke</a></li>
 					<li><a href="Spawn.html">Spawn</a></li>
 					<li><a href="SpawnStatic.html">SpawnStatic</a></li>
@@ -82,6 +88,8 @@
 					<li><a href="Static.html">Static</a></li>
 					<li><a href="StaticObject.html">StaticObject</a></li>
 					<li><a href="Task.html">Task</a></li>
+					<li><a href="Task_A2A.html">Task_A2A</a></li>
+					<li><a href="Task_A2A_Dispatcher.html">Task_A2A_Dispatcher</a></li>
 					<li><a href="Task_A2G.html">Task_A2G</a></li>
 					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_Cargo.html">Task_Cargo</a></li>
@@ -97,7 +105,7 @@
 	<div id="content">
    <h1>Module <code>Zone</code></h1>
    
-<p><strong>Core</strong> - ZONE classes define <strong>zones</strong> within your mission of <strong>various forms</strong>, with <strong>various capabilities</strong>.</p>
+<p><strong>Core</strong> -- ZONE classes define <strong>zones</strong> within your mission of <strong>various forms</strong>, with <strong>various capabilities</strong>.</p>
 
    
 
@@ -136,39 +144,8 @@
 
 <hr/>
 
-<h1><strong>API CHANGE HISTORY</strong></h1>
-
-<p>The underlying change log documents the API changes. Please read this carefully. The following notation is used:</p>
-
-<ul>
-    <li><strong>Added</strong> parts are expressed in bold type face.</li>
-    <li><em>Removed</em> parts are expressed in italic type face.</li>
-</ul>
-
-<p>Hereby the change log:</p>
-
-<p>2017-02-28: ZONE_BASE:<strong>IsVec2InZone()</strong> replaces ZONE_BASE:<em>IsPointVec2InZone()</em>. <br/>
-2017-02-28: ZONE_BASE:<strong>IsVec3InZone()</strong> replaces ZONE_BASE:<em>IsPointVec3InZone()</em>. <br/>
-2017-02-28: ZONE_RADIUS:<strong>IsVec2InZone()</strong> replaces ZONE_RADIUS:<em>IsPointVec2InZone()</em>. <br/>
-2017-02-28: ZONE_RADIUS:<strong>IsVec3InZone()</strong> replaces ZONE_RADIUS:<em>IsPointVec3InZone()</em>. <br/>
-2017-02-28: ZONE_POLYGON:<strong>IsVec2InZone()</strong> replaces ZONE_POLYGON:<em>IsPointVec2InZone()</em>. <br/>
-2017-02-28: ZONE_POLYGON:<strong>IsVec3InZone()</strong> replaces ZONE_POLYGON:<em>IsPointVec3InZone()</em>.  </p>
-
-<p>2017-02-18: ZONE_POLYGON_BASE:<strong>GetRandomPointVec2()</strong> added.</p>
-
-<p>2017-02-18: ZONE_POLYGON_BASE:<strong>GetRandomPointVec3()</strong> added.</p>
-
-<p>2017-02-18: ZONE_RADIUS:<strong>GetRandomPointVec3( inner, outer )</strong> added.</p>
-
-<p>2017-02-18: ZONE_RADIUS:<strong>GetRandomPointVec2( inner, outer )</strong> added.</p>
-
-<p>2016-08-15: ZONE_BASE:<strong>GetName()</strong> added.</p>
-
-<p>2016-08-15: ZONE_BASE:<strong>SetZoneProbability( ZoneProbability )</strong> added.</p>
-
-<p>2016-08-15: ZONE_BASE:<strong>GetZoneProbability()</strong> added.</p>
-
-<p>2016-08-15: ZONE_BASE:<strong>GetZoneMaybe()</strong> added.</p>
+<h3>Author: <strong>Sven Van de Velde (FlightControl)</strong></h3>
+<h3>Contributions:</h3>
 
 <hr/>
 
@@ -257,7 +234,7 @@
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(ZONE_BASE).GetCoordinate">ZONE_BASE:GetCoordinate(Height)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(ZONE_BASE).GetCoordinate">ZONE_BASE:GetCoordinate()</a></td>
 		<td class="summary">
 <p>Returns a <a href="Point.html##(COORDINATE)">Point#COORDINATE</a> of the zone.</p>
 </td>
@@ -942,22 +919,13 @@ The bounding square.</p>
 <dt>
 
 <a id="#(ZONE_BASE).GetCoordinate" >
-<strong>ZONE_BASE:GetCoordinate(Height)</strong>
+<strong>ZONE_BASE:GetCoordinate()</strong>
 </a>
 </dt>
 <dd>
 	
 <p>Returns a <a href="Point.html##(COORDINATE)">Point#COORDINATE</a> of the zone.</p>
 
-		<h3>Parameter</h3>
-		<ul>
-				<li>
-				
-<p><code><em><a href="Dcs.DCSTypes.html##(Distance)">Dcs.DCSTypes#Distance</a> Height </em></code>: 
-The height to add to the land height where the center of the zone is located.</p>
-
-				</li>
-		</ul>
 		<h3>Return value</h3>
 				
 <p><em><a href="Core.Point.html##(COORDINATE)">Core.Point#COORDINATE</a>:</em>

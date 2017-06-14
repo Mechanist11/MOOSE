@@ -17,6 +17,11 @@
 				<a href="index.html">index</a>
 			</li></ul>
 		<ul>
+					<li><a href="AI_A2A.html">AI_A2A</a></li>
+					<li><a href="AI_A2A_Cap.html">AI_A2A_Cap</a></li>
+					<li><a href="AI_A2A_Dispatcher.html">AI_A2A_Dispatcher</a></li>
+					<li><a href="AI_A2A_GCI.html">AI_A2A_GCI</a></li>
+					<li><a href="AI_A2A_Patrol.html">AI_A2A_Patrol</a></li>
 					<li><a href="AI_Bai.html">AI_Bai</a></li>
 					<li><a href="AI_Balancer.html">AI_Balancer</a></li>
 					<li><a href="AI_Cap.html">AI_Cap</a></li>
@@ -75,6 +80,7 @@
 					<li><a href="Scoring.html">Scoring</a></li>
 					<li><a href="Sead.html">Sead</a></li>
 					<li><a href="Set.html">Set</a></li>
+					<li><a href="Settings.html">Settings</a></li>
 					<li><a href="Smoke.html">Smoke</a></li>
 					<li><a href="Spawn.html">Spawn</a></li>
 					<li><a href="SpawnStatic.html">SpawnStatic</a></li>
@@ -82,6 +88,8 @@
 					<li><a href="Static.html">Static</a></li>
 					<li><a href="StaticObject.html">StaticObject</a></li>
 					<li><a href="Task.html">Task</a></li>
+					<li><a href="Task_A2A.html">Task_A2A</a></li>
+					<li><a href="Task_A2A_Dispatcher.html">Task_A2A_Dispatcher</a></li>
 					<li>Task_A2G</li>
 					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_Cargo.html">Task_Cargo</a></li>
@@ -103,114 +111,53 @@
 
 <p><img src="..\Presentations\TASK_A2G\Dia1.JPG" alt="Banner Image"/></p>
 
-
-<h1>1) <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a> class, extends <a href="Task.html##(TASK)">Task#TASK</a></h1>
-
-<p>The <a href="##(TASK_A2G)">#TASK_A2G</a> class defines Air To Ground tasks for a <a href="Set.html">Set</a> of Target Units, 
-based on the tasking capabilities defined in <a href="Task.html##(TASK)">Task#TASK</a>.
-The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Statemachine#FSM_TASK</a>, and has the following statuses:</p>
-
-<ul>
-    <li><strong>None</strong>: Start of the process</li>
-    <li><strong>Planned</strong>: The A2G task is planned.</li>
-    <li><strong>Assigned</strong>: The A2G task is assigned to a <a href="Group.html##(GROUP)">Group#GROUP</a>.</li>
-    <li><strong>Success</strong>: The A2G task is successfully completed.</li>
-    <li><strong>Failed</strong>: The A2G task has failed. This will happen if the player exists the task early, without communicating a possible cancellation to HQ.</li>
-</ul>
-
-<h1>1.1) Set the scoring of achievements in an A2G attack.</h1>
-
-<p>Scoring or penalties can be given in the following circumstances:</p>
-
-<ul>
-    <li><a href="##(TASK_A2G).SetScoreOnDestroy">TASK_A2G.SetScoreOnDestroy</a>(): Set a score when a target in scope of the A2G attack, has been destroyed.</li>
-    <li><a href="##(TASK_A2G).SetScoreOnSuccess">TASK_A2G.SetScoreOnSuccess</a>(): Set a score when all the targets in scope of the A2G attack, have been destroyed.</li>
-    <li><a href="##(TASK_A2G).SetPenaltyOnFailed">TASK_A2G.SetPenaltyOnFailed</a>(): Set a penalty when the A2G attack has failed.</li>
-</ul>
-
-<h1>2) <a href="Task_A2G.html##(TASK_SEAD)">Task<em>A2G#TASK</em>SEAD</a> class, extends <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a></h1>
-
-<p>The <a href="##(TASK_SEAD)">#TASK_SEAD</a> class defines a SEAD task for a <a href="Set.html">Set</a> of Target Units.</p>
-
 <hr/>
 
-<h1>3) <a href="Task_A2G.html##(TASK_CAS)">Task<em>A2G#TASK</em>CAS</a> class, extends <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a></h1>
-
-<p>The <a href="##(TASK_CAS)">#TASK_CAS</a> class defines a CAS task for a <a href="Set.html">Set</a> of Target Units.</p>
-
-<hr/>
-
-<h1>4) <a href="Task_A2G.html##(TASK_BAI)">Task<em>A2G#TASK</em>BAI</a> class, extends <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a></h1>
-
-<p>The <a href="##(TASK_BAI)">#TASK_BAI</a> class defines a BAI task for a <a href="Set.html">Set</a> of Target Units.</p>
-
-<hr/>
-
-<h1><strong>API CHANGE HISTORY</strong></h1>
-
-<p>The underlying change log documents the API changes. Please read this carefully. The following notation is used:</p>
-
-<ul>
-    <li><strong>Added</strong> parts are expressed in bold type face.</li>
-    <li><em>Removed</em> parts are expressed in italic type face.</li>
-</ul>
-
-<p>Hereby the change log:</p>
-
-<p>2017-03-09: Revised version.</p>
-
-<hr/>
-
-<h1><strong>AUTHORS and CONTRIBUTIONS</strong></h1>
+<h3>Author: <strong>Sven Van de Velde (FlightControl)</strong></h3>
 
 <h3>Contributions:</h3>
 
-<ul>
-    <li><strong>[WingThor]</strong>: Concept, Advice &amp; Testing.</li>
-</ul>
-
-<h3>Authors:</h3>
-
-<ul>
-    <li><strong>FlightControl</strong>: Concept, Design &amp; Programming.
-    </li>
-</ul>
+<hr/>
+<p>  </p>
 
 	<h2>Global(s)</h2>
 	<table class="function_list">
 		<tr>
 		<td class="name" nowrap="nowrap"><a href="#TASK_A2G">TASK_A2G</a></td>
 		<td class="summary">
+<h1>TASK_A2G class, extends <a href="Task.html##(TASK)">Task#TASK</a></h1>
 
+<p>The TASK_A2G class defines Air To Ground tasks for a <a href="Set.html">Set</a> of Target Units, 
+based on the tasking capabilities defined in <a href="Task.html##(TASK)">Task#TASK</a>.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="#TASK_BAI">TASK_BAI</a></td>
+		<td class="name" nowrap="nowrap"><a href="#TASK_A2G_BAI">TASK_A2G_BAI</a></td>
 		<td class="summary">
+<h1>TASK<em>A2G</em>BAI class, extends <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a></h1>
 
+<p>The TASK<em>A2G</em>BAI class defines an Battlefield Air Interdiction task for a human player to be executed.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="#TASK_CAS">TASK_CAS</a></td>
+		<td class="name" nowrap="nowrap"><a href="#TASK_A2G_CAS">TASK_A2G_CAS</a></td>
 		<td class="summary">
+<h1>TASK<em>A2G</em>CAS class, extends <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a></h1>
 
+<p>The TASK<em>A2G</em>CAS class defines an Close Air Support task for a human player to be executed.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="#TASK_SEAD">TASK_SEAD</a></td>
+		<td class="name" nowrap="nowrap"><a href="#TASK_A2G_SEAD">TASK_A2G_SEAD</a></td>
 		<td class="summary">
+<h1>TASK<em>A2G</em>SEAD class, extends <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a></h1>
 
+<p>The TASK<em>A2G</em>SEAD class defines an Suppression or Extermination of Air Defenses task for a human player to be executed.</p>
 </td>
 		</tr>
 	</table>
 			<h2><a id="#(TASK_A2G)">Type <code>TASK_A2G</code></a></h2>
 				<table class="function_list">
-		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).ClassName">TASK_A2G.ClassName</a></td>
-		<td class="summary">
-
-</td>
-		</tr>
 		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).GetPlannedMenuText">TASK_A2G:GetPlannedMenuText()</a></td>
 		<td class="summary">
@@ -218,7 +165,7 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).GetRendezVousPointVec2">TASK_A2G:GetRendezVousPointVec2(TaskUnit)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).GetRendezVousCoordinate">TASK_A2G:GetRendezVousCoordinate(TaskUnit)</a></td>
 		<td class="summary">
 
 </td>
@@ -230,7 +177,7 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).GetTargetPointVec2">TASK_A2G:GetTargetPointVec2(TaskUnit)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).GetTargetCoordinate">TASK_A2G:GetTargetCoordinate(TaskUnit)</a></td>
 		<td class="summary">
 
 </td>
@@ -254,7 +201,7 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).SetRendezVousPointVec2">TASK_A2G:SetRendezVousPointVec2(RendezVousPointVec2, RendezVousRange, TaskUnit)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).SetRendezVousCoordinate">TASK_A2G:SetRendezVousCoordinate(RendezVousCoordinate, RendezVousRange, TaskUnit)</a></td>
 		<td class="summary">
 
 </td>
@@ -278,7 +225,7 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).SetTargetPointVec2">TASK_A2G:SetTargetPointVec2(TargetPointVec2, TaskUnit)</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G).SetTargetCoordinate">TASK_A2G:SetTargetCoordinate(TargetCoordinate, TaskUnit)</a></td>
 		<td class="summary">
 
 </td>
@@ -297,66 +244,48 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 		</tr>
 	</table>
 
-			<h2><a id="#(TASK_BAI)">Type <code>TASK_BAI</code></a></h2>
+			<h2><a id="#(TASK_A2G_BAI)">Type <code>TASK_A2G_BAI</code></a></h2>
 				<table class="function_list">
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_BAI).ClassName">TASK_BAI.ClassName</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G_BAI).New">TASK_A2G_BAI:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</a></td>
 		<td class="summary">
-
+<p>Instantiates a new TASK<em>A2G</em>BAI.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_BAI).New">TASK_BAI:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</a></td>
-		<td class="summary">
-<p>Instantiates a new TASK_BAI.</p>
-</td>
-		</tr>
-		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_BAI).TargetSetUnit">TASK_BAI.TargetSetUnit</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G_BAI).TargetSetUnit">TASK_A2G_BAI.TargetSetUnit</a></td>
 		<td class="summary">
 
 </td>
 		</tr>
 	</table>
 
-			<h2><a id="#(TASK_CAS)">Type <code>TASK_CAS</code></a></h2>
+			<h2><a id="#(TASK_A2G_CAS)">Type <code>TASK_A2G_CAS</code></a></h2>
 				<table class="function_list">
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_CAS).ClassName">TASK_CAS.ClassName</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G_CAS).New">TASK_A2G_CAS:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</a></td>
 		<td class="summary">
-
+<p>Instantiates a new TASK<em>A2G</em>CAS.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_CAS).New">TASK_CAS:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</a></td>
-		<td class="summary">
-<p>Instantiates a new TASK_CAS.</p>
-</td>
-		</tr>
-		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_CAS).TargetSetUnit">TASK_CAS.TargetSetUnit</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G_CAS).TargetSetUnit">TASK_A2G_CAS.TargetSetUnit</a></td>
 		<td class="summary">
 
 </td>
 		</tr>
 	</table>
 
-			<h2><a id="#(TASK_SEAD)">Type <code>TASK_SEAD</code></a></h2>
+			<h2><a id="#(TASK_A2G_SEAD)">Type <code>TASK_A2G_SEAD</code></a></h2>
 				<table class="function_list">
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_SEAD).ClassName">TASK_SEAD.ClassName</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G_SEAD).New">TASK_A2G_SEAD:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</a></td>
 		<td class="summary">
-
+<p>Instantiates a new TASK<em>A2G</em>SEAD.</p>
 </td>
 		</tr>
 		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_SEAD).New">TASK_SEAD:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</a></td>
-		<td class="summary">
-<p>Instantiates a new TASK_SEAD.</p>
-</td>
-		</tr>
-		<tr>
-		<td class="name" nowrap="nowrap"><a href="##(TASK_SEAD).TargetSetUnit">TASK_SEAD.TargetSetUnit</a></td>
+		<td class="name" nowrap="nowrap"><a href="##(TASK_A2G_SEAD).TargetSetUnit">TASK_A2G_SEAD.TargetSetUnit</a></td>
 		<td class="summary">
 
 </td>
@@ -374,6 +303,31 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 </dt>
 <dd>
 	
+<h1>TASK_A2G class, extends <a href="Task.html##(TASK)">Task#TASK</a></h1>
+
+<p>The TASK_A2G class defines Air To Ground tasks for a <a href="Set.html">Set</a> of Target Units, 
+based on the tasking capabilities defined in <a href="Task.html##(TASK)">Task#TASK</a>.</p>
+
+	
+<p>The TASK_A2G is implemented using a <a href="Fsm.html##(FSM_TASK)">Fsm#FSM_TASK</a>, and has the following statuses:</p>
+
+<ul>
+    <li><strong>None</strong>: Start of the process</li>
+    <li><strong>Planned</strong>: The A2G task is planned.</li>
+    <li><strong>Assigned</strong>: The A2G task is assigned to a <a href="Group.html##(GROUP)">Group#GROUP</a>.</li>
+    <li><strong>Success</strong>: The A2G task is successfully completed.</li>
+    <li><strong>Failed</strong>: The A2G task has failed. This will happen if the player exists the task early, without communicating a possible cancellation to HQ.</li>
+</ul>
+
+<h2>Set the scoring of achievements in an A2G attack.</h2>
+
+<p>Scoring or penalties can be given in the following circumstances:</p>
+
+<ul>
+    <li><a href="##(TASK_A2G).SetScoreOnDestroy">TASK_A2G.SetScoreOnDestroy</a>(): Set a score when a target in scope of the A2G attack, has been destroyed.</li>
+    <li><a href="##(TASK_A2G).SetScoreOnSuccess">TASK_A2G.SetScoreOnSuccess</a>(): Set a score when all the targets in scope of the A2G attack, have been destroyed.</li>
+    <li><a href="##(TASK_A2G).SetPenaltyOnFailed">TASK_A2G.SetPenaltyOnFailed</a>(): Set a penalty when the A2G attack has failed.</li>
+</ul>
 
 
 </dd>
@@ -381,13 +335,23 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 		<dl class="function">
 <dt>
 
-		<em><a href="##(TASK_BAI)">#TASK_BAI</a></em>
-<a id="TASK_BAI" >
-<strong>TASK_BAI</strong>
+		<em><a href="##(TASK_A2G_BAI)">#TASK_A2G_BAI</a></em>
+<a id="TASK_A2G_BAI" >
+<strong>TASK_A2G_BAI</strong>
 </a>
 </dt>
 <dd>
 	
+<h1>TASK<em>A2G</em>BAI class, extends <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a></h1>
+
+<p>The TASK<em>A2G</em>BAI class defines an Battlefield Air Interdiction task for a human player to be executed.</p>
+
+	
+<p>These tasks are more strategic in nature and are most of the time further away from friendly forces.
+BAI tasks can also be used to express the abscence of friendly forces near the vicinity.</p>
+
+<p>The TASK<em>A2G</em>BAI is used by the <a href="Task_A2G_Dispatcher.html##(TASK_A2G_DISPATCHER)">Task<em>A2G</em>Dispatcher#TASK<em>A2G</em>DISPATCHER</a> to automatically create BAI tasks 
+based on detected enemy ground targets.</p>
 
 
 </dd>
@@ -395,13 +359,22 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 		<dl class="function">
 <dt>
 
-		<em><a href="##(TASK_CAS)">#TASK_CAS</a></em>
-<a id="TASK_CAS" >
-<strong>TASK_CAS</strong>
+		<em><a href="##(TASK_A2G_CAS)">#TASK_A2G_CAS</a></em>
+<a id="TASK_A2G_CAS" >
+<strong>TASK_A2G_CAS</strong>
 </a>
 </dt>
 <dd>
 	
+<h1>TASK<em>A2G</em>CAS class, extends <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a></h1>
+
+<p>The TASK<em>A2G</em>CAS class defines an Close Air Support task for a human player to be executed.</p>
+
+	
+<p>Friendly forces will be in the vicinity within 6km from the enemy.</p>
+
+<p>The TASK<em>A2G</em>CAS is used by the <a href="Task_A2G_Dispatcher.html##(TASK_A2G_DISPATCHER)">Task<em>A2G</em>Dispatcher#TASK<em>A2G</em>DISPATCHER</a> to automatically create CAS tasks 
+based on detected enemy ground targets.</p>
 
 
 </dd>
@@ -409,13 +382,22 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 		<dl class="function">
 <dt>
 
-		<em><a href="##(TASK_SEAD)">#TASK_SEAD</a></em>
-<a id="TASK_SEAD" >
-<strong>TASK_SEAD</strong>
+		<em><a href="##(TASK_A2G_SEAD)">#TASK_A2G_SEAD</a></em>
+<a id="TASK_A2G_SEAD" >
+<strong>TASK_A2G_SEAD</strong>
 </a>
 </dt>
 <dd>
 	
+<h1>TASK<em>A2G</em>SEAD class, extends <a href="Task_A2G.html##(TASK_A2G)">Task<em>A2G#TASK</em>A2G</a></h1>
+
+<p>The TASK<em>A2G</em>SEAD class defines an Suppression or Extermination of Air Defenses task for a human player to be executed.</p>
+
+	
+<p>These tasks are important to be executed as they will help to achieve air superiority at the vicinity.</p>
+
+<p>The TASK<em>A2G</em>SEAD is used by the <a href="Task_A2G_Dispatcher.html##(TASK_A2G_DISPATCHER)">Task<em>A2G</em>Dispatcher#TASK<em>A2G</em>DISPATCHER</a> to automatically create SEAD tasks 
+based on detected enemy ground targets.</p>
 
 
 </dd>
@@ -432,20 +414,6 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 		<dl class="function">
 <dt>
 
-		<em>#string</em>
-<a id="#(TASK_A2G).ClassName" >
-<strong>TASK_A2G.ClassName</strong>
-</a>
-</dt>
-<dd>
-	
-
-
-</dd>
-</dl>
-		<dl class="function">
-<dt>
-
 <a id="#(TASK_A2G).GetPlannedMenuText" >
 <strong>TASK_A2G:GetPlannedMenuText()</strong>
 </a>
@@ -459,8 +427,8 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 		<dl class="function">
 <dt>
 
-<a id="#(TASK_A2G).GetRendezVousPointVec2" >
-<strong>TASK_A2G:GetRendezVousPointVec2(TaskUnit)</strong>
+<a id="#(TASK_A2G).GetRendezVousCoordinate" >
+<strong>TASK_A2G:GetRendezVousCoordinate(TaskUnit)</strong>
 </a>
 </dt>
 <dd>
@@ -479,8 +447,8 @@ The TASK_A2G is implemented using a <a href="Statemachine.html##(FSM_TASK)">Stat
 			<ol>
 				<li>
 				
-<p><em><a href="Core.Point.html##(POINT_VEC2)">Core.Point#POINT_VEC2</a>:</em>
-The PointVec2 object referencing to the 2D point where the RendezVous point is located on the map.</p>
+<p><em><a href="Core.Point.html##(COORDINATE)">Core.Point#COORDINATE</a>:</em>
+The Coordinate object referencing to the 2D point where the RendezVous point is located on the map.</p>
 
 				</li>
 				<li>
@@ -521,8 +489,8 @@ The Zone object where the RendezVous is located on the map.</p>
 		<dl class="function">
 <dt>
 
-<a id="#(TASK_A2G).GetTargetPointVec2" >
-<strong>TASK_A2G:GetTargetPointVec2(TaskUnit)</strong>
+<a id="#(TASK_A2G).GetTargetCoordinate" >
+<strong>TASK_A2G:GetTargetCoordinate(TaskUnit)</strong>
 </a>
 </dt>
 <dd>
@@ -539,8 +507,8 @@ The Zone object where the RendezVous is located on the map.</p>
 		</ul>
 		<h3>Return value</h3>
 				
-<p><em><a href="Core.Point.html##(POINT_VEC2)">Core.Point#POINT_VEC2</a>:</em>
-The PointVec2 object where the Target is located on the map.</p>
+<p><em><a href="Core.Point.html##(COORDINATE)">Core.Point#COORDINATE</a>:</em>
+The Coordinate object where the Target is located on the map.</p>
 
 </dd>
 </dl>
@@ -682,8 +650,8 @@ The penalty in points.</p>
 		<dl class="function">
 <dt>
 
-<a id="#(TASK_A2G).SetRendezVousPointVec2" >
-<strong>TASK_A2G:SetRendezVousPointVec2(RendezVousPointVec2, RendezVousRange, TaskUnit)</strong>
+<a id="#(TASK_A2G).SetRendezVousCoordinate" >
+<strong>TASK_A2G:SetRendezVousCoordinate(RendezVousCoordinate, RendezVousRange, TaskUnit)</strong>
 </a>
 </dt>
 <dd>
@@ -694,8 +662,8 @@ The penalty in points.</p>
 		<ul>
 				<li>
 				
-<p><code><em><a href="Core.Point.html##(POINT_VEC2)">Core.Point#POINT_VEC2</a> RendezVousPointVec2 </em></code>: 
-The PointVec2 object referencing to the 2D point where the RendezVous point is located on the map.</p>
+<p><code><em><a href="Core.Point.html##(COORDINATE)">Core.Point#COORDINATE</a> RendezVousCoordinate </em></code>: 
+The Coordinate object referencing to the 2D point where the RendezVous point is located on the map.</p>
 
 				</li>
 				<li>
@@ -818,8 +786,8 @@ The score in points.</p>
 		<dl class="function">
 <dt>
 
-<a id="#(TASK_A2G).SetTargetPointVec2" >
-<strong>TASK_A2G:SetTargetPointVec2(TargetPointVec2, TaskUnit)</strong>
+<a id="#(TASK_A2G).SetTargetCoordinate" >
+<strong>TASK_A2G:SetTargetCoordinate(TargetCoordinate, TaskUnit)</strong>
 </a>
 </dt>
 <dd>
@@ -830,8 +798,8 @@ The score in points.</p>
 		<ul>
 				<li>
 				
-<p><code><em><a href="Core.Point.html##(POINT_VEC2)">Core.Point#POINT_VEC2</a> TargetPointVec2 </em></code>: 
-The PointVec2 object where the Target is located on the map.</p>
+<p><code><em><a href="Core.Point.html##(COORDINATE)">Core.Point#COORDINATE</a> TargetCoordinate </em></code>: 
+The Coordinate object where the Target is located on the map.</p>
 
 				</li>
 				<li>
@@ -884,35 +852,21 @@ The Zone object where the Target is located on the map.</p>
 </dd>
 </dl>
 
-			<h2><a id="#(TASK_BAI)" >Type <code>TASK_BAI</code></a></h2>
+			<h2><a id="#(TASK_A2G_BAI)" >Type <code>TASK_A2G_BAI</code></a></h2>
 				
-<p>The TASK_BAI class</p>
+<p>The TASK<em>A2G</em>BAI class</p>
 
 	<h3>Field(s)</h3>
 		<dl class="function">
 <dt>
 
-		<em>#string</em>
-<a id="#(TASK_BAI).ClassName" >
-<strong>TASK_BAI.ClassName</strong>
+<a id="#(TASK_A2G_BAI).New" >
+<strong>TASK_A2G_BAI:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</strong>
 </a>
 </dt>
 <dd>
 	
-
-
-</dd>
-</dl>
-		<dl class="function">
-<dt>
-
-<a id="#(TASK_BAI).New" >
-<strong>TASK_BAI:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</strong>
-</a>
-</dt>
-<dd>
-	
-<p>Instantiates a new TASK_BAI.</p>
+<p>Instantiates a new TASK<em>A2G</em>BAI.</p>
 
 		<h3>Parameters</h3>
 		<ul>
@@ -947,7 +901,7 @@ The briefing of the task.</p>
 		</ul>
 		<h3>Return value</h3>
 				
-<p><em><a href="##(TASK_BAI)">#TASK_BAI</a>:</em>
+<p><em><a href="##(TASK_A2G_BAI)">#TASK<em>A2G</em>BAI</a>:</em>
 self</p>
 
 </dd>
@@ -956,8 +910,8 @@ self</p>
 <dt>
 
 		<em><a href="Set.html##(SET_UNIT)">Set#SET_UNIT</a></em>
-<a id="#(TASK_BAI).TargetSetUnit" >
-<strong>TASK_BAI.TargetSetUnit</strong>
+<a id="#(TASK_A2G_BAI).TargetSetUnit" >
+<strong>TASK_A2G_BAI.TargetSetUnit</strong>
 </a>
 </dt>
 <dd>
@@ -967,35 +921,21 @@ self</p>
 </dd>
 </dl>
 
-			<h2><a id="#(TASK_CAS)" >Type <code>TASK_CAS</code></a></h2>
+			<h2><a id="#(TASK_A2G_CAS)" >Type <code>TASK_A2G_CAS</code></a></h2>
 				
-<p>The TASK_CAS class</p>
+<p>The TASK<em>A2G</em>CAS class</p>
 
 	<h3>Field(s)</h3>
 		<dl class="function">
 <dt>
 
-		<em>#string</em>
-<a id="#(TASK_CAS).ClassName" >
-<strong>TASK_CAS.ClassName</strong>
+<a id="#(TASK_A2G_CAS).New" >
+<strong>TASK_A2G_CAS:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</strong>
 </a>
 </dt>
 <dd>
 	
-
-
-</dd>
-</dl>
-		<dl class="function">
-<dt>
-
-<a id="#(TASK_CAS).New" >
-<strong>TASK_CAS:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</strong>
-</a>
-</dt>
-<dd>
-	
-<p>Instantiates a new TASK_CAS.</p>
+<p>Instantiates a new TASK<em>A2G</em>CAS.</p>
 
 		<h3>Parameters</h3>
 		<ul>
@@ -1030,7 +970,7 @@ The briefing of the task.</p>
 		</ul>
 		<h3>Return value</h3>
 				
-<p><em><a href="##(TASK_CAS)">#TASK_CAS</a>:</em>
+<p><em><a href="##(TASK_A2G_CAS)">#TASK<em>A2G</em>CAS</a>:</em>
 self</p>
 
 </dd>
@@ -1039,8 +979,8 @@ self</p>
 <dt>
 
 		<em><a href="Set.html##(SET_UNIT)">Set#SET_UNIT</a></em>
-<a id="#(TASK_CAS).TargetSetUnit" >
-<strong>TASK_CAS.TargetSetUnit</strong>
+<a id="#(TASK_A2G_CAS).TargetSetUnit" >
+<strong>TASK_A2G_CAS.TargetSetUnit</strong>
 </a>
 </dt>
 <dd>
@@ -1050,35 +990,21 @@ self</p>
 </dd>
 </dl>
 
-			<h2><a id="#(TASK_SEAD)" >Type <code>TASK_SEAD</code></a></h2>
+			<h2><a id="#(TASK_A2G_SEAD)" >Type <code>TASK_A2G_SEAD</code></a></h2>
 				
-<p>The TASK_SEAD class</p>
+<p>The TASK<em>A2G</em>SEAD class</p>
 
 	<h3>Field(s)</h3>
 		<dl class="function">
 <dt>
 
-		<em>#string</em>
-<a id="#(TASK_SEAD).ClassName" >
-<strong>TASK_SEAD.ClassName</strong>
+<a id="#(TASK_A2G_SEAD).New" >
+<strong>TASK_A2G_SEAD:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</strong>
 </a>
 </dt>
 <dd>
 	
-
-
-</dd>
-</dl>
-		<dl class="function">
-<dt>
-
-<a id="#(TASK_SEAD).New" >
-<strong>TASK_SEAD:New(Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing)</strong>
-</a>
-</dt>
-<dd>
-	
-<p>Instantiates a new TASK_SEAD.</p>
+<p>Instantiates a new TASK<em>A2G</em>SEAD.</p>
 
 		<h3>Parameters</h3>
 		<ul>
@@ -1113,7 +1039,7 @@ The briefing of the task.</p>
 		</ul>
 		<h3>Return value</h3>
 				
-<p><em><a href="##(TASK_SEAD)">#TASK_SEAD</a>:</em>
+<p><em><a href="##(TASK_A2G_SEAD)">#TASK<em>A2G</em>SEAD</a>:</em>
 self</p>
 
 </dd>
@@ -1122,8 +1048,8 @@ self</p>
 <dt>
 
 		<em><a href="Set.html##(SET_UNIT)">Set#SET_UNIT</a></em>
-<a id="#(TASK_SEAD).TargetSetUnit" >
-<strong>TASK_SEAD.TargetSetUnit</strong>
+<a id="#(TASK_A2G_SEAD).TargetSetUnit" >
+<strong>TASK_A2G_SEAD.TargetSetUnit</strong>
 </a>
 </dt>
 <dd>

@@ -1,8 +1,15 @@
---- **Wrapper** -- This module contains the POSITIONABLE class.
+--- **Wrapper** -- POSITIONABLE wraps DCS classes that are "positionable".
 -- 
--- ===
+-- ====
+-- 
+-- ### Author: **Sven Van de Velde (FlightControl)**
+-- 
+-- ### Contributions: 
+-- 
+-- ====
 -- 
 -- @module Positionable
+
 
 --- The POSITIONABLE class
 -- @type POSITIONABLE
@@ -10,6 +17,7 @@
 -- @field #string PositionableName The name of the measurable.
 -- @field Core.Spot#SPOT Spot The laser Spot.
 -- @field #number LaserCode The last assigned laser code.
+
 
 --- # POSITIONABLE class, extends @{Identifiable#IDENTIFIABLE}
 -- 
@@ -23,14 +31,17 @@
 -- 
 -- The POSITIONABLE class provides the following functions to construct a POSITIONABLE instance:
 --
---  * @{Positionable#POSITIONABLE.New}(): Create a POSITIONABLE instance.
---
--- ## POSITIONABLE methods
+--  * @{#POSITIONABLE.New}(): Create a POSITIONABLE instance.
 -- 
--- The following methods can be used to identify an measurable object:
+-- ## Get the current speed
 -- 
---    * @{Positionable#POSITIONABLE.GetID}(): Returns the ID of the measurable object.
---    * @{Positionable#POSITIONABLE.GetName}(): Returns the name of the measurable object.
+-- There are 3 methods that can be used to determine the speed.
+-- Use @{#POSITIONABLE.GetVelocityKMH}() to retrieve the current speed in km/h. Use @{#POSITIONABLE.GetVelocityMPS}() to retrieve the speed in meters per second.
+-- The method @{#POSITIONABLE.GetVelocity}() returns the speed vector (a Vec3).
+-- 
+-- ## Get the current altitude
+-- 
+-- Altitude can be retrieved using the method @{#POSITIONABLE.GetHeight}() and returns the current altitude in meters from the orthonormal plane.
 -- 
 -- 
 -- @field #POSITIONABLE 
@@ -148,7 +159,8 @@ function POSITIONABLE:GetCoordinate()
   if DCSPositionable then
     local PositionableVec3 = self:GetPositionVec3()
     
-    local PositionableCoordinate = COORDINATE:NewFromVec3( PositionableVec3 )
+    local PositionableCoordinate = POINT_VEC3:NewFromVec3( PositionableVec3 )
+    PositionableCoordinate:SetHeading( self:GetHeading() )
   
     self:T2( PositionableCoordinate )
     return PositionableCoordinate
@@ -363,6 +375,25 @@ function POSITIONABLE:GetVelocityKMH()
     local VelocityVec3 = self:GetVelocity()
     local Velocity = ( VelocityVec3.x ^ 2 + VelocityVec3.y ^ 2 + VelocityVec3.z ^ 2 ) ^ 0.5 -- in meters / sec
     local Velocity = Velocity * 3.6 -- now it is in km/h.
+    self:T3( Velocity )
+    return Velocity
+  end
+  
+  return nil
+end
+
+--- Returns the POSITIONABLE velocity in meters per second.
+-- @param Wrapper.Positionable#POSITIONABLE self
+-- @return #number The velocity in meters per second.
+-- @return #nil The POSITIONABLE is not existing or alive.  
+function POSITIONABLE:GetVelocityMPS()
+  self:F2( self.PositionableName )
+
+  local DCSPositionable = self:GetDCSObject()
+  
+  if DCSPositionable then
+    local VelocityVec3 = self:GetVelocity()
+    local Velocity = ( VelocityVec3.x ^ 2 + VelocityVec3.y ^ 2 + VelocityVec3.z ^ 2 ) ^ 0.5 -- in meters / sec
     self:T3( Velocity )
     return Velocity
   end

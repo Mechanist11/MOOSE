@@ -9,7 +9,16 @@
 --  * Handle local Unit Controller.
 --  * Manage the "state" of the DCS Unit.
 --  
+-- ====
+-- 
+-- ### Author: **Sven Van de Velde (FlightControl)**
+-- 
+-- ### Contributions: 
+-- 
+-- ====
+-- 
 -- @module Unit
+
 
 --- @type UNIT
 -- @extends Wrapper.Controllable#CONTROLLABLE
@@ -315,7 +324,8 @@ function UNIT:GetPlayerName()
     return PlayerName
   end
 
-  return nil
+    return nil
+
 end
 
 --- Returns the unit's number in the group. 
@@ -640,7 +650,7 @@ function UNIT:GetThreatLevel()
       "Unarmed", 
       "Tanker", 
       "AWACS", 
-      "Transport Helicpter",   
+      "Transport Helicopter",   
       "UAV",
       "Bomber",
       "Strategic Bomber",

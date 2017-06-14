@@ -1,11 +1,12 @@
---- **Tasking** -- This module contains the TASK class.
+--- **Tasking** -- This module contains the TASK class, the main engine to run human taskings.
 -- 
--- ===
+-- ====
 -- 
+-- ### Author: **Sven Van de Velde (FlightControl)**
 -- 
--- ===
+-- ### Contributions: 
 -- 
--- ### Authors: FlightControl - Design and Programming
+-- ====
 -- 
 -- @module Task
 
@@ -825,7 +826,7 @@ end
 -- @param #TASK self
 function TASK:MenuTaskStatus( TaskGroup )
 
-  local ReportText = self:ReportDetails()
+  local ReportText = self:ReportDetails( TaskGroup )
   
   self:T( ReportText )
   self:GetMission():GetCommandCenter():MessageToGroup( ReportText, TaskGroup )
@@ -1174,7 +1175,7 @@ function TASK:onenterSuccess( From, Event, To )
   self:GetMission():GetCommandCenter():MessageToCoalition( "Task " .. self:GetName() .. " is successful! Good job!" )
   self:UnAssignFromGroups()
   
-  --self:GetMission():__Complete( 1 )
+  self:GetMission():__MissionGoals( 1 )
   
 end
 
@@ -1307,21 +1308,35 @@ end
 -- List the Task Name and Status
 -- @param #TASK self
 -- @return #string
-function TASK:ReportOverview() --R2.1 fixed report. Now nicely formatted and contains the info required.
+function TASK:ReportOverview( ReportGroup ) --R2.1 fixed report. Now nicely formatted and contains the info required.
 
-  local Report = REPORT:New()
   
   -- List the name of the Task.
   local Name = self:GetName()
+  local Report = REPORT:New( Name )
   
   -- Determine the status of the Task.
   local State = self:GetState()
   
-  local Detection = self.TaskInfo["Detection"] and " - " .. self.TaskInfo["Detection"] or "" 
-  
-  Report:Add( "Task " .. Name .. Detection )
+  for TaskInfoID, TaskInfo in pairs( self.TaskInfo ) do
 
-  return Report:Text()
+    local TaskInfoIDText = string.format( "%s: ", TaskInfoID )
+  
+    if type(TaskInfo) == "string" then
+      Report:Add( TaskInfoIDText .. TaskInfo )
+    elseif type(TaskInfo) == "table" then
+      if TaskInfoID == "Coordinates" then
+        local FromCoordinate = ReportGroup:GetUnit(1):GetCoordinate()
+        local ToCoordinate = TaskInfo -- Core.Point#COORDINATE
+        --Report:Add( TaskInfoIDText )
+        Report:Add( ToCoordinate:ToString( ReportGroup ) )
+        --Report:AddIndent( ToCoordinate:ToStringBULLS( ReportGroup:GetCoalition() ) )
+      else
+      end
+    end
+  end
+  
+  return Report:Text( ", ")
 end
 
 --- Create a count of the players in the Task.
@@ -1369,8 +1384,9 @@ end
 --- Create a detailed report of the Task.
 -- List the Task Status, and the Players assigned to the Task.
 -- @param #TASK self
+-- @param Wrapper.Group#GROUP TaskGroup
 -- @return #string
-function TASK:ReportDetails() --R2.1 fixed report. Now nicely formatted and contains the info required.
+function TASK:ReportDetails( ReportGroup )
 
   local Report = REPORT:New():SetIndent( 3 )
   
@@ -1389,16 +1405,28 @@ function TASK:ReportDetails() --R2.1 fixed report. Now nicely formatted and cont
   end
   local Players = PlayerReport:Text()
 
-  local Detection = self.TaskInfo["Detection"] or "" 
-  local Changes = self.TaskInfo["Changes"] or ""
-
   Report:Add( "Task: " .. Name .. " - " .. State .. " - Detailed Report" )
-  Report:Add( "\n - Players:" )
+  Report:Add( " - Players:" )
   Report:AddIndent( Players )
-  Report:Add( "\n - Detection:" )
-  Report:AddIndent( Detection )
-  Report:Add( "\n - Detection Changes:" )
-  Report:AddIndent( Changes )
+  
+  for TaskInfoID, TaskInfo in pairs( self.TaskInfo ) do
+    
+    local TaskInfoIDText = string.format( " - %s: ", TaskInfoID )
+
+    if type(TaskInfo) == "string" then
+      Report:Add( TaskInfoIDText .. TaskInfo )
+    elseif type(TaskInfo) == "table" then
+      if TaskInfoID == "Coordinates" then
+        local FromCoordinate = ReportGroup:GetUnit(1):GetCoordinate()
+        local ToCoordinate = TaskInfo -- Core.Point#COORDINATE
+        Report:Add( TaskInfoIDText )
+        Report:AddIndent( ToCoordinate:ToStringBRA( FromCoordinate ) .. ", " .. TaskInfo:ToStringAspect( FromCoordinate ) )
+        Report:AddIndent( ToCoordinate:ToStringBULLS( ReportGroup:GetCoalition() ) )
+      else
+      end
+    end
+    
+  end
   
   return Report:Text()
 end

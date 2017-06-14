@@ -17,6 +17,11 @@
 				<a href="index.html">index</a>
 			</li></ul>
 		<ul>
+					<li><a href="AI_A2A.html">AI_A2A</a></li>
+					<li><a href="AI_A2A_Cap.html">AI_A2A_Cap</a></li>
+					<li><a href="AI_A2A_Dispatcher.html">AI_A2A_Dispatcher</a></li>
+					<li><a href="AI_A2A_GCI.html">AI_A2A_GCI</a></li>
+					<li><a href="AI_A2A_Patrol.html">AI_A2A_Patrol</a></li>
 					<li><a href="AI_Bai.html">AI_Bai</a></li>
 					<li><a href="AI_Balancer.html">AI_Balancer</a></li>
 					<li><a href="AI_Cap.html">AI_Cap</a></li>
@@ -75,6 +80,7 @@
 					<li><a href="Scoring.html">Scoring</a></li>
 					<li><a href="Sead.html">Sead</a></li>
 					<li><a href="Set.html">Set</a></li>
+					<li><a href="Settings.html">Settings</a></li>
 					<li><a href="Smoke.html">Smoke</a></li>
 					<li><a href="Spawn.html">Spawn</a></li>
 					<li><a href="SpawnStatic.html">SpawnStatic</a></li>
@@ -82,6 +88,8 @@
 					<li><a href="Static.html">Static</a></li>
 					<li><a href="StaticObject.html">StaticObject</a></li>
 					<li><a href="Task.html">Task</a></li>
+					<li><a href="Task_A2A.html">Task_A2A</a></li>
+					<li><a href="Task_A2A_Dispatcher.html">Task_A2A_Dispatcher</a></li>
 					<li><a href="Task_A2G.html">Task_A2G</a></li>
 					<li><a href="Task_A2G_Dispatcher.html">Task_A2G_Dispatcher</a></li>
 					<li><a href="Task_Cargo.html">Task_Cargo</a></li>
@@ -97,9 +105,15 @@
 	<div id="content">
    <h1>Module <code>Positionable</code></h1>
    
-<p><strong>Wrapper</strong> -- This module contains the POSITIONABLE class.</p>
+<p><strong>Wrapper</strong> -- POSITIONABLE wraps DCS classes that are "positionable".</p>
 
    
+
+<hr/>
+
+<h3>Author: <strong>Sven Van de Velde (FlightControl)</strong></h3>
+
+<h3>Contributions:</h3>
 
 <hr/>
 
@@ -246,6 +260,12 @@
 </td>
 		</tr>
 		<tr>
+		<td class="name" nowrap="nowrap"><a href="##(POSITIONABLE).GetVelocityMPS">POSITIONABLE:GetVelocityMPS()</a></td>
+		<td class="summary">
+<p>Returns the POSITIONABLE velocity in meters per second.</p>
+</td>
+		</tr>
+		<tr>
 		<td class="name" nowrap="nowrap"><a href="##(POSITIONABLE).InAir">POSITIONABLE:InAir()</a></td>
 		<td class="summary">
 <p>Returns true if the POSITIONABLE is in the air.</p>
@@ -379,17 +399,18 @@
 <p>The POSITIONABLE class provides the following functions to construct a POSITIONABLE instance:</p>
 
 <ul>
-    <li><a href="Positionable.html##(POSITIONABLE).New">Positionable#POSITIONABLE.New</a>(): Create a POSITIONABLE instance.</li>
+    <li><a href="##(POSITIONABLE).New">POSITIONABLE.New</a>(): Create a POSITIONABLE instance.</li>
 </ul>
 
-<h2>POSITIONABLE methods</h2>
+<h2>Get the current speed</h2>
 
-<p>The following methods can be used to identify an measurable object:</p>
+<p>There are 3 methods that can be used to determine the speed.
+Use <a href="##(POSITIONABLE).GetVelocityKMH">POSITIONABLE.GetVelocityKMH</a>() to retrieve the current speed in km/h. Use <a href="##(POSITIONABLE).GetVelocityMPS">POSITIONABLE.GetVelocityMPS</a>() to retrieve the speed in meters per second.
+The method <a href="##(POSITIONABLE).GetVelocity">POSITIONABLE.GetVelocity</a>() returns the speed vector (a Vec3).</p>
 
-<ul>
-    <li><a href="Positionable.html##(POSITIONABLE).GetID">Positionable#POSITIONABLE.GetID</a>(): Returns the ID of the measurable object.</li>
-    <li><a href="Positionable.html##(POSITIONABLE).GetName">Positionable#POSITIONABLE.GetName</a>(): Returns the name of the measurable object.</li>
-</ul>
+<h2>Get the current altitude</h2>
+
+<p>Altitude can be retrieved using the method <a href="##(POSITIONABLE).GetHeight">POSITIONABLE.GetHeight</a>() and returns the current altitude in meters from the orthonormal plane.</p>
 
 
 
@@ -933,6 +954,34 @@ The POSITIONABLE is not existing or alive.  </p>
 				
 <p><em>#number:</em>
 The velocity in km/h</p>
+
+				</li>
+				<li>
+				
+<p><em>#nil:</em>
+The POSITIONABLE is not existing or alive.  </p>
+
+				</li>
+			</ol>
+</dd>
+</dl>
+		<dl class="function">
+<dt>
+
+<a id="#(POSITIONABLE).GetVelocityMPS" >
+<strong>POSITIONABLE:GetVelocityMPS()</strong>
+</a>
+</dt>
+<dd>
+	
+<p>Returns the POSITIONABLE velocity in meters per second.</p>
+
+		<h3>Return values</h3>
+			<ol>
+				<li>
+				
+<p><em>#number:</em>
+The velocity in meters per second.</p>
 
 				</li>
 				<li>
