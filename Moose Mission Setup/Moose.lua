@@ -1,5 +1,5 @@
 env.info( '*** MOOSE STATIC INCLUDE START *** ' )
-env.info( 'Moose Generation Timestamp: 20170623_0914' )
+env.info( 'Moose Generation Timestamp: 20170623_2206' )
 
 --- Various routines
 -- @module routines
@@ -9683,7 +9683,7 @@ end
 -- @param #SET_GROUP self
 -- @return #SET_GROUP self
 function SET_GROUP:FilterCategoryAirplane()
-  self:FilterCategories( "airplane" )
+  self:FilterCategories( "plane" )
   return self
 end
 
@@ -14513,12 +14513,7 @@ end
   
     self.Task:Fail()
   end
-  
-  function FSM_PROCESS:onenterSuccess( ProcessUnit )
-    self:T( "Success" )
-  
-    self.Task:Success()
-  end
+
   
   --- StateMachine callback function for a FSM_PROCESS
   -- @param #FSM_PROCESS self
@@ -43248,7 +43243,7 @@ do -- ACT_ROUTE
           RouteText = Coordinate:ToStringFromRP( ShortestReferencePoint, ShortestReferenceName, Controllable )
         end
       else
-        RouteText = self.Coordinate:ToString( Controllable )
+        RouteText = Coordinate:ToString( Controllable )
       end
     end
 
@@ -43602,7 +43597,6 @@ do -- ACT_ACCOUNT
     self:AddTransition( "Account", "NoMore", "Accounted")
     self:AddTransition( "*", "Fail", "Failed")
     
-    self:AddEndState( "Accounted" )
     self:AddEndState( "Failed" )
     
     self:SetStartState( "Assigned" ) 
@@ -43621,6 +43615,7 @@ do -- ACT_ACCOUNT
   function ACT_ACCOUNT:onafterStart( ProcessUnit, From, Event, To )
 
     self:HandleEvent( EVENTS.Dead, self.onfuncEventDead )
+    self:HandleEvent( EVENTS.Crash, self.onfuncEventCrash )
 
     self:__Wait( 1 )
   end
@@ -43730,7 +43725,7 @@ do -- ACT_ACCOUNT_DEADS
   function ACT_ACCOUNT_DEADS:onenterAccount( ProcessUnit, Task, From, Event, To, EventData  )
     self:T( { ProcessUnit, EventData, From, Event, To } )
     
-    self:T({self.Controllable})
+    self:T( { self.Controllable } )
   
     self.TargetSetUnit:Flush()
     
@@ -43739,7 +43734,7 @@ do -- ACT_ACCOUNT_DEADS
       self:T( "Sending Message" )
       local TaskGroup = ProcessUnit:GetGroup()
       self.TargetSetUnit:Remove( EventData.IniUnitName )
-      self:Message( "You hit a target. Your group with assigned " .. self.TaskName .. " task has " .. self.TargetSetUnit:Count() .. " targets ( " .. self.TargetSetUnit:GetUnitTypesText() .. " ) left to be destroyed." )
+      self:Message( "Target destroyed. Your group with assigned " .. self.TaskName .. " task has " .. self.TargetSetUnit:Count() .. " targets ( " .. self.TargetSetUnit:GetUnitTypesText() .. " ) left to be destroyed." )
     end
     self:T( { "After sending Message" } )
   end
@@ -43764,6 +43759,18 @@ do -- ACT_ACCOUNT_DEADS
   --- @param #ACT_ACCOUNT_DEADS self
   -- @param Event#EVENTDATA EventData
   function ACT_ACCOUNT_DEADS:onfuncEventDead( EventData )
+    self:T( { "EventDead", EventData } )
+
+    if EventData.IniDCSUnit then
+      self:Event( EventData )
+    end
+  end
+
+  --- DCS Events
+  
+  --- @param #ACT_ACCOUNT_DEADS self
+  -- @param Event#EVENTDATA EventData
+  function ACT_ACCOUNT_DEADS:onfuncEventCrash( EventData )
     self:T( { "EventDead", EventData } )
 
     if EventData.IniDCSUnit then
@@ -45569,6 +45576,36 @@ function TASK:New( Mission, SetGroupAssign, TaskName, TaskType, TaskBriefing )
   self:AddTransition( "Assigned", "Fail", "Failed" )
   self:AddTransition( "Assigned", "Abort", "Aborted" )
   self:AddTransition( "Assigned", "Cancel", "Cancelled" )
+  self:AddTransition( "Assigned", "Goal", "*" )
+  
+  --- Goal Handler OnBefore for TASK
+  -- @function [parent=#TASK] OnBeforeGoal
+  -- @param #TASK self
+  -- @param Wrapper.Controllable#CONTROLLABLE Controllable
+  -- @param #string From
+  -- @param #string Event
+  -- @param #string To
+  -- @return #boolean
+  
+  --- Goal Handler OnAfter for TASK
+  -- @function [parent=#TASK] OnAfterGoal
+  -- @param #TASK self
+  -- @param Wrapper.Controllable#CONTROLLABLE Controllable
+  -- @param #string From
+  -- @param #string Event
+  -- @param #string To
+  
+  --- Goal Trigger for TASK
+  -- @function [parent=#TASK] Goal
+  -- @param #TASK self
+  
+  --- Goal Asynchronous Trigger for TASK
+  -- @function [parent=#TASK] __Goal
+  -- @param #TASK self
+  -- @param #number Delay
+  
+  
+  
   self:AddTransition( "*", "PlayerCrashed", "*" )
   self:AddTransition( "*", "PlayerAborted", "*" )
   self:AddTransition( "*", "PlayerDead", "*" )
@@ -45878,7 +45915,7 @@ do -- Group Assignment
       local TaskUnit = UnitData -- Wrapper.Unit#UNIT
       local PlayerName = TaskUnit:GetPlayerName()
       self:E(PlayerName)
-      if PlayerName ~= nil or PlayerName ~= "" then
+      if PlayerName ~= nil and PlayerName ~= "" then
         self:AssignToUnit( TaskUnit )
         CommandCenter:MessageToGroup( 
           string.format( 'Task "%s": Briefing for player (%s):\n%s', 
@@ -46557,6 +46594,9 @@ function TASK:onenterAssigned( From, Event, To, PlayerUnit, PlayerName )
     
     self:GetMission():__Start( 1 )
     
+    -- When the task is assigned, the task goal needs to be checked of the derived classes.
+    self:__Goal( -10 )  -- Polymorphic
+     
     self:SetMenu()
   end
 end
@@ -47473,14 +47513,14 @@ do -- TASK_A2G
     Fsm:AddTransition( { "ArrivedAtRendezVous", "HoldingAtRendezVous" }, "Engage", "Engaging" )
     Fsm:AddTransition( { "ArrivedAtRendezVous", "HoldingAtRendezVous" }, "HoldAtRendezVous", "HoldingAtRendezVous" )
      
-    Fsm:AddProcess   ( "Engaging", "Account", ACT_ACCOUNT_DEADS:New( self.TargetSetUnit, self.TaskType ), { Accounted = "Success" } )
+    Fsm:AddProcess   ( "Engaging", "Account", ACT_ACCOUNT_DEADS:New( self.TargetSetUnit, self.TaskType ), {} )
     Fsm:AddTransition( "Engaging", "RouteToTarget", "Engaging" )
     Fsm:AddProcess( "Engaging", "RouteToTargetZone", ACT_ROUTE_ZONE:New(), {} )
     Fsm:AddProcess( "Engaging", "RouteToTargetPoint", ACT_ROUTE_POINT:New(), {} )
     Fsm:AddTransition( "Engaging", "RouteToTargets", "Engaging" )
     
-    Fsm:AddTransition( "Accounted", "DestroyedAll", "Accounted" )
-    Fsm:AddTransition( "Accounted", "Success", "Success" )
+    --Fsm:AddTransition( "Accounted", "DestroyedAll", "Accounted" )
+    --Fsm:AddTransition( "Accounted", "Success", "Success" )
     Fsm:AddTransition( "Rejected", "Reject", "Aborted" )
     Fsm:AddTransition( "Failed", "Fail", "Failed" )
     
@@ -47767,6 +47807,17 @@ do -- TASK_A2G_SEAD
     return self
   end 
 
+  --- @param #TASK_A2G_SEAD self
+  function TASK_A2G_SEAD:onafterGoal( TaskUnit, From, Event, To )
+    local TargetSetUnit = self.TargetSetUnit -- Core.Set#SET_UNIT
+    
+    if TargetSetUnit:Count() == 0 then
+      self:Success()
+    end
+    
+    self:__Goal( -10 )
+  end
+
 end
 
 do -- TASK_A2G_BAI
@@ -47820,6 +47871,17 @@ do -- TASK_A2G_BAI
     return self
   end 
 
+  --- @param #TASK_A2G_BAI self
+  function TASK_A2G_BAI:onafterGoal( TaskUnit, From, Event, To )
+    local TargetSetUnit = self.TargetSetUnit -- Core.Set#SET_UNIT
+    
+    if TargetSetUnit:Count() == 0 then
+      self:Success()
+    end
+    
+    self:__Goal( -10 )
+  end
+
 end
 
 do -- TASK_A2G_CAS
@@ -47872,6 +47934,17 @@ do -- TASK_A2G_CAS
 
     return self
   end 
+
+  --- @param #TASK_A2G_CAS self
+  function TASK_A2G_CAS:onafterGoal( TaskUnit, From, Event, To )
+    local TargetSetUnit = self.TargetSetUnit -- Core.Set#SET_UNIT
+    
+    if TargetSetUnit:Count() == 0 then
+      self:Success()
+    end
+    
+    self:__Goal( -10 )
+  end
 
 end
 --- **Tasking** - The TASK_A2A_DISPATCHER creates and manages player TASK_A2A tasks based on detected targets.
@@ -48506,14 +48579,14 @@ do -- TASK_A2A
     Fsm:AddTransition( { "ArrivedAtRendezVous", "HoldingAtRendezVous" }, "Engage", "Engaging" )
     Fsm:AddTransition( { "ArrivedAtRendezVous", "HoldingAtRendezVous" }, "HoldAtRendezVous", "HoldingAtRendezVous" )
      
-    Fsm:AddProcess   ( "Engaging", "Account", ACT_ACCOUNT_DEADS:New( self.TargetSetUnit, self.TaskType ), { Accounted = "Success" } )
+    Fsm:AddProcess   ( "Engaging", "Account", ACT_ACCOUNT_DEADS:New( self.TargetSetUnit, self.TaskType ), {} )
     Fsm:AddTransition( "Engaging", "RouteToTarget", "Engaging" )
     Fsm:AddProcess( "Engaging", "RouteToTargetZone", ACT_ROUTE_ZONE:New(), {} )
     Fsm:AddProcess( "Engaging", "RouteToTargetPoint", ACT_ROUTE_POINT:New(), {} )
     Fsm:AddTransition( "Engaging", "RouteToTargets", "Engaging" )
     
-    Fsm:AddTransition( "Accounted", "DestroyedAll", "Accounted" )
-    Fsm:AddTransition( "Accounted", "Success", "Success" )
+--    Fsm:AddTransition( "Accounted", "DestroyedAll", "Accounted" )
+--    Fsm:AddTransition( "Accounted", "Success", "Success" )
     Fsm:AddTransition( "Rejected", "Reject", "Aborted" )
     Fsm:AddTransition( "Failed", "Fail", "Failed" )
     
@@ -48601,7 +48674,7 @@ do -- TASK_A2A
   function TASK_A2A:GetPlannedMenuText()
     return self:GetStateString() .. " - " .. self:GetTaskName() .. " ( " .. self.TargetSetUnit:GetUnitTypesText() .. " )"
   end
-
+  
   --- @param #TASK_A2A self
   -- @param Core.Point#COORDINATE RendezVousCoordinate The Coordinate object referencing to the 2D point where the RendezVous point is located on the map.
   -- @param #number RendezVousRange The RendezVousRange that defines when the player is considered to have arrived at the RendezVous point.
@@ -48782,7 +48855,7 @@ do -- TASK_A2A_INTERCEPT
   -- @param #string TaskName The name of the Task.
   -- @param Core.Set#SET_UNIT TargetSetUnit 
   -- @param #string TaskBriefing The briefing of the task.
-  -- @return #TASK_A2A_INTERCEPT self
+  -- @return #TASK_A2A_INTERCEPT
   function TASK_A2A_INTERCEPT:New( Mission, SetGroup, TaskName, TargetSetUnit, TaskBriefing )
     local self = BASE:Inherit( self, TASK_A2A:New( Mission, SetGroup, TaskName, TargetSetUnit, "INTERCEPT", TaskBriefing ) ) -- #TASK_A2A_INTERCEPT
     self:F()
@@ -48806,6 +48879,21 @@ do -- TASK_A2A_INTERCEPT
     
     return self
   end 
+
+
+  --- @param #TASK_A2A_INTERCEPT self
+  function TASK_A2A_INTERCEPT:onafterGoal( TaskUnit, From, Event, To )
+    local TargetSetUnit = self.TargetSetUnit -- Core.Set#SET_UNIT
+    
+    if TargetSetUnit:Count() == 0 then
+      self:Success()
+    end
+    
+    self:__Goal( -10 )
+  end
+  
+
+
 
 end
 
@@ -48869,6 +48957,17 @@ do -- TASK_A2A_SWEEP
     return self
   end 
 
+  --- @param #TASK_A2A_SWEEP self
+  function TASK_A2A_SWEEP:onafterGoal( TaskUnit, From, Event, To )
+    local TargetSetUnit = self.TargetSetUnit -- Core.Set#SET_UNIT
+    
+    if TargetSetUnit:Count() == 0 then
+      self:Success()
+    end
+    
+    self:__Goal( -10 )
+  end
+
 end
 
 
@@ -48928,6 +49027,18 @@ do -- TASK_A2A_ENGAGE
     
     return self
   end 
+
+  --- @param #TASK_A2A_ENGAGE self
+  function TASK_A2A_ENGAGE:onafterGoal( TaskUnit, From, Event, To )
+    local TargetSetUnit = self.TargetSetUnit -- Core.Set#SET_UNIT
+    
+    if TargetSetUnit:Count() == 0 then
+      self:Success()
+    end
+    
+    self:__Goal( -10 )
+  end
+  
 
 end
 
