@@ -1,5 +1,5 @@
 env.info( '*** MOOSE STATIC INCLUDE START *** ' )
-env.info( 'Moose Generation Timestamp: 20170620_1219' )
+env.info( 'Moose Generation Timestamp: 20170623_0914' )
 
 --- Various routines
 -- @module routines
@@ -9465,7 +9465,7 @@ end
 --- @type SET_GROUP
 -- @extends Core.Set#SET_BASE
 
---- # 2) SET_GROUP class, extends @{Set#SET_BASE}
+--- # SET_GROUP class, extends @{Set#SET_BASE}
 -- 
 -- Mission designers can use the @{Set#SET_GROUP} class to build sets of groups belonging to certain:
 -- 
@@ -9474,18 +9474,18 @@ end
 --  * Countries
 --  * Starting with certain prefix strings.
 --  
--- ## 2.1) SET_GROUP constructor
+-- ## 1. SET_GROUP constructor
 -- 
 -- Create a new SET_GROUP object with the @{#SET_GROUP.New} method:
 -- 
 --    * @{#SET_GROUP.New}: Creates a new SET_GROUP object.
 -- 
--- ## 2.2) Add or Remove GROUP(s) from SET_GROUP
+-- ## 2. Add or Remove GROUP(s) from SET_GROUP
 -- 
 -- GROUPS can be added and removed using the @{Set#SET_GROUP.AddGroupsByName} and @{Set#SET_GROUP.RemoveGroupsByName} respectively. 
 -- These methods take a single GROUP name or an array of GROUP names to be added or removed from SET_GROUP.
 -- 
--- ## 2.3) SET_GROUP filter criteria
+-- ## 3. SET_GROUP filter criteria
 -- 
 -- You can set filter criteria to define the set of groups within the SET_GROUP.
 -- Filter criteria are defined by:
@@ -9494,6 +9494,15 @@ end
 --    * @{#SET_GROUP.FilterCategories}: Builds the SET_GROUP with the groups belonging to the category(ies).
 --    * @{#SET_GROUP.FilterCountries}: Builds the SET_GROUP with the gruops belonging to the country(ies).
 --    * @{#SET_GROUP.FilterPrefixes}: Builds the SET_GROUP with the groups starting with the same prefix string(s).
+-- 
+-- For the Category Filter, extra methods have been added:
+-- 
+--    * @{#SET_GROUP.FilterCategoryAirplane}: Builds the SET_GROUP from airplanes.
+--    * @{#SET_GROUP.FilterCategoryHelicopter}: Builds the SET_GROUP from helicopters.
+--    * @{#SET_GROUP.FilterCategoryGround}: Builds the SET_GROUP from ground vehicles or infantry.
+--    * @{#SET_GROUP.FilterCategoryShip}: Builds the SET_GROUP from ships.
+--    * @{#SET_GROUP.FilterCategoryStructure}: Builds the SET_GROUP from structures.
+-- 
 --   
 -- Once the filter criteria have been set for the SET_GROUP, you can start filtering using:
 -- 
@@ -9503,7 +9512,7 @@ end
 -- 
 --    * @{#SET_GROUP.FilterZones}: Builds the SET_GROUP with the groups within a @{Zone#ZONE}.
 -- 
--- ## 2.4) SET_GROUP iterators
+-- ## 4. SET_GROUP iterators
 -- 
 -- Once the filters have been defined and the SET_GROUP has been built, you can iterate the SET_GROUP with the available iterator methods.
 -- The iterator methods will walk the SET_GROUP set, and call for each element within the set a function that you provide.
@@ -9533,7 +9542,7 @@ SET_GROUP = {
     Categories = {
       plane = Group.Category.AIRPLANE,
       helicopter = Group.Category.HELICOPTER,
-      ground = Group.Category.GROUND_UNIT,
+      ground = Group.Category.GROUND, -- R2.2
       ship = Group.Category.SHIP,
       structure = Group.Category.STRUCTURE,
     },
@@ -9661,6 +9670,48 @@ function SET_GROUP:FilterCategories( Categories )
   end
   return self
 end
+
+--- Builds a set of groups out of ground category.
+-- @param #SET_GROUP self
+-- @return #SET_GROUP self
+function SET_GROUP:FilterCategoryGround()
+  self:FilterCategories( "ground" )
+  return self
+end
+
+--- Builds a set of groups out of airplane category.
+-- @param #SET_GROUP self
+-- @return #SET_GROUP self
+function SET_GROUP:FilterCategoryAirplane()
+  self:FilterCategories( "airplane" )
+  return self
+end
+
+--- Builds a set of groups out of helicopter category.
+-- @param #SET_GROUP self
+-- @return #SET_GROUP self
+function SET_GROUP:FilterCategoryHelicopter()
+  self:FilterCategories( "helicopter" )
+  return self
+end
+
+--- Builds a set of groups out of ship category.
+-- @param #SET_GROUP self
+-- @return #SET_GROUP self
+function SET_GROUP:FilterCategoryShip()
+  self:FilterCategories( "ship" )
+  return self
+end
+
+--- Builds a set of groups out of structure category.
+-- @param #SET_GROUP self
+-- @return #SET_GROUP self
+function SET_GROUP:FilterCategoryStructure()
+  self:FilterCategories( "structure" )
+  return self
+end
+
+
 
 --- Builds a set of groups of defined countries.
 -- Possible current countries are those known within DCS world.
@@ -10074,7 +10125,7 @@ function SET_GROUP:IsIncludeObject( MooseGroup )
     local MooseGroupPrefix = false
     for GroupPrefixId, GroupPrefix in pairs( self.Filter.GroupPrefixes ) do
       self:T3( { "Prefix:", string.find( MooseGroup:GetName(), GroupPrefix, 1 ), GroupPrefix } )
-      if string.find( MooseGroup:GetName(), GroupPrefix, 1 ) then
+      if string.find( MooseGroup:GetName(), GroupPrefix:gsub ("-", "%%-"), 1 ) then
         MooseGroupPrefix = true
       end
     end
@@ -12657,8 +12708,8 @@ do -- COORDINATE
       end
   
       if Settings:IsA2A_BULLS() then
-        local Coordinate = Controllable:GetCoordinate()
-        return self:ToStringBULLS( Coordinate, Settings )
+        local Coalition = Controllable:GetCoalition()
+        return self:ToStringBULLS( Coalition, Settings )
       end
     else
       if Settings:IsA2G_BRA()  then
@@ -23318,22 +23369,22 @@ AIRBASE.Normandy = {
   ["Maupertus"] = "Maupertus",
   ["Brucheville"] = "Brucheville",
   ["Meautis"] = "Meautis",
-  ["Cricqueville-en-Bessin"] = "Cricqueville-en-Bessin",
+  ["Cricqueville_en_Bessin"] = "Cricqueville-en-Bessin",
   ["Lessay"] = "Lessay",
-  ["Sainte-Laurent-sur-Mer"] = "Sainte-Laurent-sur-Mer",
+  ["Sainte_Laurent_sur_Mer"] = "Sainte-Laurent-sur-Mer",
   ["Biniville"] = "Biniville",
   ["Cardonville"] = "Cardonville",
-  ["Deux Jumeaux"] = "Deux Jumeaux",
+  ["Deux_Jumeaux"] = "Deux Jumeaux",
   ["Chippelle"] = "Chippelle",
   ["Beuzeville"] = "Beuzeville",
   ["Azeville"] = "Azeville",
   ["Picauville"] = "Picauville",
-  ["Le Molay"] = "Le Molay",
-  ["Longues-sur-Mer"] = "Longues-sur-Mer",
+  ["Le_Molay"] = "Le Molay",
+  ["Longues_sur_Mer"] = "Longues-sur-Mer",
   ["Carpiquet"] = "Carpiquet",
   ["Bazenville"] = "Bazenville",
-  ["Sainte-Croix-sur-Mer"] = "Sainte-Croix-sur-Mer",
-  ["Beny-sur-Mer"] = "Beny-sur-Mer",
+  ["Sainte_Croix_sur_Mer"] = "Sainte-Croix-sur-Mer",
+  ["Beny_sur_Mer"] = "Beny-sur-Mer",
   ["Rucqueville"] = "Rucqueville",
   ["Sommervieu"] = "Sommervieu",
   ["Lantheuil"] = "Lantheuil",
@@ -32089,6 +32140,14 @@ do -- DETECTION_BASE
       return DetectedItem.FriendliesNearBy
     end
   
+    --- Returns friendly units nearby the FAC units sorted per distance ...
+    -- @param #DETECTION_BASE self
+    -- @return #map<#number,Wrapper.Unit#UNIT> The map of Friendly UNITs. 
+    function DETECTION_BASE:GetFriendliesDistance( DetectedItem )
+      
+      return DetectedItem.FriendliesDistance
+    end
+  
     --- Returns if there are friendlies nearby the FAC units ...
     -- @param #DETECTION_BASE self
     -- @return #boolean trhe if there are friendlies nearby 
@@ -32152,8 +32211,11 @@ do -- DETECTION_BASE
           if FoundUnitCoalition ~= EnemyCoalition and FoundUnitInReportSetGroup == false then
             DetectedItem.FriendliesNearBy = DetectedItem.FriendliesNearBy or {}
             local FriendlyUnit = UNIT:Find( FoundDCSUnit )
+            local FriendlyUnitName = FriendlyUnit:GetName()
+            DetectedItem.FriendliesNearBy[FriendlyUnitName] = FriendlyUnit
             local Distance = CenterCoord:Get2DDistance( FriendlyUnit:GetCoordinate() )
-            DetectedItem.FriendliesNearBy[Distance] = FriendlyUnit
+            DetectedItem.FriendliesDistance = DetectedItem.FriendliesDistance or {}
+            DetectedItem.FriendliesDistance[Distance] = FriendlyUnit
             return true
           end
           
@@ -32169,13 +32231,22 @@ do -- DETECTION_BASE
           --- @param Wrapper.Unit#UNIT PlayerUnit
           function( PlayerUnitName )
             local PlayerUnit = UNIT:FindByName( PlayerUnitName )
+    
             if PlayerUnit and PlayerUnit:IsInZone(DetectionZone) then
+    
               DetectedItem.FriendliesNearBy = DetectedItem.FriendliesNearBy or {}
               local PlayerUnitName = PlayerUnit:GetName()
+    
               DetectedItem.PlayersNearBy = DetectedItem.PlayersNearBy or {}
               DetectedItem.PlayersNearBy[PlayerUnitName] = PlayerUnit
+    
               DetectedItem.FriendliesNearBy = DetectedItem.FriendliesNearBy or {}
               DetectedItem.FriendliesNearBy[PlayerUnitName] = PlayerUnit
+    
+              local CenterCoord = DetectedUnit:GetCoordinate()
+              local Distance = CenterCoord:Get2DDistance( PlayerUnit:GetCoordinate() )
+              DetectedItem.FriendliesDistance = DetectedItem.FriendliesDistance or {}
+              DetectedItem.FriendliesDistance[Distance] = PlayerUnit
             end
           end
         )
@@ -36724,9 +36795,6 @@ do -- AI_A2A_DISPATCHER
   -- ## 1. AI\_A2A\_DISPATCHER constructor:
   -- 
   -- The @{#AI_A2A_DISPATCHER.New}() method creates a new AI\_A2A\_DISPATCHER instance.
-  -- There are two parameters required, a @{Set#SET_GROUP} that defines the Groups of the EWR network, and a radius in meters, that will be used to group the detected targets.
-  -- 
-  -- The @{#AI_A2A_DISPATCHER.New}() method is used to setup the EWR network and to define the grouping.
   -- 
   -- ### 1.1. Define the **EWR network**:
   -- 
@@ -36750,7 +36818,7 @@ do -- AI_A2A_DISPATCHER
   -- therefore less CAP and GCI flights will spawn and this will tend to make just the border area active rather than a melee over the whole map. 
   -- It all depends on what the desired effect is. 
   -- 
-  -- EWR networks are **dynamically constructed**, that is, they form part of the @{Set#SET_GROUP} object that is given as the input parameter of the AI\_A2A\_DISPATCHER class.
+  -- EWR networks are **dynamically constructed**, that is, they form part of the @{Functional#DETECTION_BASE} object that is given as the input parameter of the AI\_A2A\_DISPATCHER class.
   -- By defining in a **smart way the names or name prefixes of the groups** with EWR capable units, these groups will be **automatically added or deleted** from the EWR network, 
   -- increasing or decreasing the radar coverage of the Early Warning System.
   -- 
@@ -36761,18 +36829,22 @@ do -- AI_A2A_DISPATCHER
   --     DetectionSetGroup = SET_GROUP:New()
   --     DetectionSetGroup:FilterPrefixes( { "DF CCCP AWACS", "DF CCCP EWR" } )
   --     DetectionSetGroup:FilterStart()
+  --     
+  --     -- Setup the detection.
+  --     Detection = DETECTION_AREAS:New( DetectionSetGroup, 30000 )
   --
   --     -- Setup the A2A dispatcher, and initialize it.
-  --     A2ADispatcher = AI_A2A_DISPATCHER:New( DetectionSetGroup, 30000 )
+  --     A2ADispatcher = AI_A2A_DISPATCHER:New( Detection )
   -- 
   -- The above example creates a SET_GROUP instance, and stores this in the variable (object) **DetectionSetGroup**.
   -- **DetectionSetGroup** is then being configured to filter all active groups with a group name starting with **DF CCCP AWACS** or **DF CCCP EWR** to be included in the Set.
   -- **DetectionSetGroup** is then being ordered to start the dynamic filtering. Note that any destroy or new spawn of a group with the above names will be removed or added to the Set.
-  -- The **DetectionSetGroup** variable is then passed to the @{#AI_A2A_DISPATCHER.New}() method to indicate the EWR network configuration and setup the A2A defense detection mechanism.
+  -- Then a new Detection object is created from the class DETECTION_AREAS. A grouping radius of 30000 is choosen, which is 30km.
+  -- The **Detection** object is then passed to the @{#AI_A2A_DISPATCHER.New}() method to indicate the EWR network configuration and setup the A2A defense detection mechanism.
   -- 
-  -- ### 1.2. Define the detected **target grouping radius**:
+  -- ### 2. Define the detected **target grouping radius**:
   -- 
-  -- As a second parameter of the @{#AI_A2A_DISPATCHER.New}() method, 30000 indicates that detected targets need to be grouped within a radius of 30km.
+  -- The target grouping radius is a property of the Detection object, that was passed to the AI\_A2A\_DISPATCHER object, but can be changed.
   -- The grouping radius should not be too small, but also depends on the types of planes and the era of the simulation.
   -- Fast planes like in the 80s, need a larger radius than WWII planes.  
   -- Typically I suggest to use 30000 for new generation planes and 10000 for older era aircraft.
@@ -36780,7 +36852,7 @@ do -- AI_A2A_DISPATCHER
   -- Note that detected targets are constantly re-grouped, that is, when certain detected aircraft are moving further than the group radius, then these aircraft will become a separate
   -- group being detected. This may result in additional GCI being started by the dispatcher! So don't make this value too small!
   -- 
-  -- ## 2. Set the **engage radius**:
+  -- ## 3. Set the **Engage radius**:
   -- 
   -- Define the radius to engage any target by airborne friendlies, which are executing cap or returning from an intercept mission.
   -- 
@@ -36795,7 +36867,15 @@ do -- AI_A2A_DISPATCHER
   -- If too small, more intercept missions may be triggered upon detected target areas.
   -- If too large, any airborne cap may not be able to reach the detected target area in time, because it is too far.
   -- 
-  -- ## 3. Set the **borders**:
+  -- ## 4. Set the **Intercept radius** or **Gci radius**:
+  -- 
+  -- When targets are detected that are still really far off, you don't want the AI_A2A_DISPATCHER to launch intercepts just yet.
+  -- You want it to wait until a certain intercept range is reached, which is the distance of the closest airbase to targer being smaller than the **Gci radius**.
+  -- The Gci radius is by default defined as 200km. This value can be overridden using the method @{#AI_A2A_DISPATCHER.SetGciRadius}().
+  -- Override the default Gci radius when the era of the warfare is early, or, when you don't want to let the AI_A2A_DISPATCHER react immediately when
+  -- a certain border or area is not being crossed.
+  -- 
+  -- ## 5. Set the **borders**:
   -- 
   -- According to the tactical and strategic design of the mission broadly decide the shape and extent of red and blue territories. 
   -- They should be laid out such that a border area is created between the two coalitions.
@@ -36814,7 +36894,7 @@ do -- AI_A2A_DISPATCHER
   -- it makes it easier sometimes for the mission maker to envisage where the red and blue territories roughly are. 
   -- In a hot war the borders are effectively defined by the ground based radar coverage of a coalition.
   -- 
-  -- ## 4. Squadrons: 
+  -- ## 6. Squadrons: 
   -- 
   -- The AI\_A2A\_DISPATCHER works with **Squadrons**, that need to be defined using the different methods available.
   -- 
@@ -36840,7 +36920,7 @@ do -- AI_A2A_DISPATCHER
   -- For performance and bug workaround reasons within DCS, squadrons have different methods to spawn new aircraft or land returning or damaged aircraft.
   -- 
   -- 
-  -- ### 4.1. Set squadron take-off methods
+  -- ### 6.1. Set squadron take-off methods
   -- 
   -- Use the various SetSquadronTakeoff... methods to control how squadrons are taking-off from the airfield:
   -- 
@@ -36861,7 +36941,7 @@ do -- AI_A2A_DISPATCHER
   -- Currently within the DCS engine, the airfield traffic coordination is erroneous and contains a lot of bugs.
   -- If you experience while testing problems with aircraft take-off or landing, please use one of the above methods as a solution to workaround these issues!
   -- 
-  -- ### 4.2. Set squadron landing methods
+  -- ### 6.2. Set squadron landing methods
   -- 
   -- In analogy with takeoff, the landing methods are to control how squadrons land at the airfield:
   -- 
@@ -36876,7 +36956,7 @@ do -- AI_A2A_DISPATCHER
   -- Note that the method @{#AI_A2A_DISPATCHER.SetSquadronLandingNearAirbase}() will only work for returning aircraft, not for damaged or out of fuel aircraft.
   -- Damaged or out-of-fuel aircraft are returning to the nearest friendly airbase and will land, and are out of control from ground control.
   -- 
-  -- ### 4.3. Set squadron grouping
+  -- ### 6.3. Set squadron grouping
   -- 
   -- Use the method @{#AI_A2A_DISPATCHER.SetSquadronGrouping}() to set the amount of CAP or GCI flights that will take-off when spawned.
   -- 
@@ -36889,7 +36969,7 @@ do -- AI_A2A_DISPATCHER
   -- 
   -- The **grouping value is set for a Squadron**, and can be **dynamically adjusted** during mission execution, so to adjust the defense flights grouping when the tactical situation changes.
   -- 
-  -- ### 4.4. Balance or setup effectiveness of the air defenses in case of GCI
+  -- ### 6.4. Balance or setup effectiveness of the air defenses in case of GCI
   -- 
   -- The effectiveness can be set with the **overhead parameter**. This is a number that is used to calculate the amount of Units that dispatching command will allocate to GCI in surplus of detected amount of units.
   -- The **default value** of the overhead parameter is 1.0, which means **equal balance**. 
@@ -36913,9 +36993,9 @@ do -- AI_A2A_DISPATCHER
   -- 
   -- The **overhead value is set for a Squadron**, and can be **dynamically adjusted** during mission execution, so to adjust the defense overhead when the tactical situation changes.
   --
-  -- ## 5. Setup a squadron for CAP
+  -- ## 7. Setup a squadron for CAP
   -- 
-  -- ### 5.1. Set the CAP zones
+  -- ### 7.1. Set the CAP zones
   -- 
   -- CAP zones are patrol areas where Combat Air Patrol (CAP) flights loiter until they either return to base due to low fuel or are assigned an interception task by ground control.
   --   
@@ -36959,7 +37039,7 @@ do -- AI_A2A_DISPATCHER
   -- Note the different @{Zone} MOOSE classes being used to create zones of different types. Please click the @{Zone} link for more information about the different zone types.
   -- Zones can be circles, can be setup in the mission editor using trigger zones, but can also be setup in the mission editor as polygons and in this case GROUP objects are being used!
   -- 
-  -- ## 5.2. Set the squadron to execute CAP:
+  -- ## 7.2. Set the squadron to execute CAP:
   --      
   -- The method @{#AI_A2A_DISPATCHER.SetSquadronCap}() defines a CAP execution for a squadron.
   -- 
@@ -36981,7 +37061,7 @@ do -- AI_A2A_DISPATCHER
   --    A2ADispatcher:SetSquadronCap( "Sochi", CAPZoneWest, 4000, 8000, 600, 800, 800, 1200, "BARO" )
   --    A2ADispatcher:SetSquadronCapInterval( "Sochi", 2, 30, 120, 1 )
   -- 
-  -- ## 6. Setup a squadron for GCI:
+  -- ## 8. Setup a squadron for GCI:
   -- 
   -- The method @{#AI_A2A_DISPATCHER.SetSquadronGci}() defines a GCI execution for a squadron.
   -- 
@@ -36998,19 +37078,19 @@ do -- AI_A2A_DISPATCHER
   -- 
   --    A2ADispatcher:SetSquadronGci( "Mozdok", 900, 1200 )
   -- 
-  -- ## 7. Other configuration options
+  -- ## 9. Other configuration options
   -- 
-  -- ### 7.1. Set a tactical display panel:
+  -- ### 9.1. Set a tactical display panel:
   -- 
   -- Every 30 seconds, a tactical display panel can be shown that illustrates what the status is of the different groups controlled by AI\_A2A\_DISPATCHER.
   -- Use the method @{#AI_A2A_DISPATCHER.SetTacticalDisplay}() to switch on the tactical display panel. The default will not show this panel.
   -- Note that there may be some performance impact if this panel is shown.
   -- 
-  -- ## 8. Mission Editor Guide:
+  -- ## 10. Mission Editor Guide:
   -- 
   -- The following steps need to be followed, in order to setup the different borders, templates and groups within the mission editor:
   -- 
-  -- ### 8.1. Define your EWR network:
+  -- ### 10.1. Define your EWR network:
   -- 
   -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia14.JPG)
   -- 
@@ -37018,7 +37098,7 @@ do -- AI_A2A_DISPATCHER
   -- Create the naming of these groups as such, that these can be easily recognized and included as a prefix within your lua MOOSE mission script.
   -- These prefixes should be unique, so that accidentally no other groups would be incorporated within the EWR network.
   -- 
-  -- ### 8.2. Define the border zone:
+  -- ### 10.2. Define the border zone:
   -- 
   -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia15.JPG)
   -- 
@@ -37028,7 +37108,7 @@ do -- AI_A2A_DISPATCHER
   -- Place the helicopter where the border zone should start, and draw using the waypoints the polygon zone around the area that is considered the border.
   -- The helicopter group name is included as the reference within your lua MOOSE mission script, so ensure that the name is unique and is easily recognizable.
   -- 
-  -- ### 8.3. Define the plane templates:
+  -- ### 10.3. Define the plane templates:
   -- 
   -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia16.JPG)
   -- 
@@ -37047,7 +37127,7 @@ do -- AI_A2A_DISPATCHER
   --   
   -- Place these airplane templates are good visible locations within your mission, so you can easily retrieve them back.
   -- 
-  -- ### 8.4. Define the CAP zones:
+  -- ### 10.4. Define the CAP zones:
   -- 
   -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia17.JPG)
   -- 
@@ -37058,7 +37138,7 @@ do -- AI_A2A_DISPATCHER
   -- 
   -- Or you can define also zones using trigger zones.
   -- 
-  -- ### 8.5. "Script it":
+  -- ### 10.5. "Script it":
   -- 
   -- Find the following mission script as an example:
   -- 
@@ -37068,8 +37148,13 @@ do -- AI_A2A_DISPATCHER
   --        DetectionSetGroup:FilterPrefixes( { "DF CCCP AWACS", "DF CCCP EWR" } )
   --        DetectionSetGroup:FilterStart()
   --        
+  --        -- Here we define detection to be done by area, with a grouping radius of 3000.
+  --        Detection = DETECTION_AREAS:New( DetectionSetGroup, 30000 )
+  --        
   --        -- Setup the A2A dispatcher, and initialize it.
-  --        A2ADispatcher = AI_A2A_DISPATCHER:New( DetectionSetGroup, 30000 )
+  --        A2ADispatcher = AI_A2A_DISPATCHER:New( Detection )
+  --        
+  -- 
   --        
   --        -- Initialize the dispatcher, setting up a border zone. This is a polygon, 
   --        -- which takes the waypoints of a late activated group with the name CCCP Border as the boundaries of the border area.
@@ -37133,15 +37218,15 @@ do -- AI_A2A_DISPATCHER
   --        A2ADispatcher:SetSquadronGci( "Novo", 900, 2100 )
   --        A2ADispatcher:SetSquadronGci( "Maykop", 900, 1200 )
   -- 
-  -- #### 8.5.1. Script the EWR network
+  -- #### 10.5.1. Script the EWR network
   -- 
   -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia20.JPG)
   -- 
-  -- #### 8.5.2. Script the AI\_A2A\_DISPATCHER object and configure it
+  -- #### 10.5.2. Script the AI\_A2A\_DISPATCHER object and configure it
   -- 
   -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia21.JPG)
   -- 
-  -- #### 8.5.3. Script the squadrons
+  -- #### 10.5.3. Script the squadrons
   -- 
   -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia22.JPG)
   -- 
@@ -37176,9 +37261,9 @@ do -- AI_A2A_DISPATCHER
   -- 
   -- Use the @{#AI_A2A_DISPATCHER.SetSquadronGci)() method to define GCI execution for the squadron.
   -- 
-  -- ## 9. Q & A:
+  -- ## 11. Q & A:
   -- 
-  -- ### 9.1. Which countries will be selected for each coalition?
+  -- ### 11.1. Which countries will be selected for each coalition?
   -- 
   -- Which countries are assigned to a coalition influences which units are available to the coalition. 
   -- For example because the mission calls for a EWR radar on the blue side the Ukraine might be chosen as a blue country 
@@ -37186,7 +37271,7 @@ do -- AI_A2A_DISPATCHER
   -- Some countries assign different tasking to aircraft, for example Germany assigns the CAP task to F-4E Phantoms but the USA does not.  
   -- Therefore if F4s are wanted as a coalition’s CAP or GCI aircraft Germany will need to be assigned to that coalition. 
   -- 
-  -- ### 9.2.Country, type, load out, skill and skins for CAP and GCI aircraft?
+  -- ### 11.2. Country, type, load out, skill and skins for CAP and GCI aircraft?
   -- 
   --   * Note these can be from any countries within the coalition but must be an aircraft with one of the main tasks being “CAP”.
   --   * Obviously skins which are selected must be available to all players that join the mission otherwise they will see a default skin.
@@ -37198,10 +37283,7 @@ do -- AI_A2A_DISPATCHER
   -- @field #AI_A2A_DISPATCHER
   AI_A2A_DISPATCHER = {
     ClassName = "AI_A2A_DISPATCHER",
-    Mission = nil,
     Detection = nil,
-    Tasks = {},
-    SweepZones = {},
   }
 
 
@@ -37222,8 +37304,7 @@ do -- AI_A2A_DISPATCHER
   
   --- AI_A2A_DISPATCHER constructor.
   -- @param #AI_A2A_DISPATCHER self
-  -- @param #string The Squadron Name. This name is used to control the squadron settings in the A2A dispatcher, and also in communication to human players.
-  -- @param Core.Set#SET_GROUP DetectionSetGroup The @{Set} of group objects that will setup the Early Warning Radar network.
+  -- @param Functional.Detection#DETECTION_BASE Detection The DETECTION object that will detects targets using the the Early Warning Radar network.
   -- @param #number GroupingRadius The radius in meters wherein detected planes are being grouped as one target area. 
   -- For airplanes, 6000 (6km) is recommended, and is also the default value of this parameter.
   -- @return #AI_A2A_DISPATCHER self
@@ -37232,10 +37313,8 @@ do -- AI_A2A_DISPATCHER
   --   -- Set a new AI A2A Dispatcher object, based on an EWR network with a 6 km grouping radius.
   --   
   -- 
-  function AI_A2A_DISPATCHER:New( DetectionSetGroup, GroupingRadius )
+  function AI_A2A_DISPATCHER:New( Detection )
 
-    local Detection = DETECTION_AREAS:New( DetectionSetGroup, GroupingRadius )
-  
     -- Inherits from DETECTION_MANAGER
     local self = BASE:Inherit( self, DETECTION_MANAGER:New( nil, Detection ) ) -- #AI_A2A_DISPATCHER
     
@@ -37250,6 +37329,9 @@ do -- AI_A2A_DISPATCHER
     self.Detection:FilterCategories( Unit.Category.AIRPLANE, Unit.Category.HELICOPTER )
     --self.Detection:InitDetectRadar( true )
     self.Detection:SetDetectionInterval( 30 )
+
+    self:SetEngageRadius()
+    self:SetGciRadius()
     
     self:AddTransition( "Started", "Assign", "Started" )
     
@@ -37420,19 +37502,51 @@ do -- AI_A2A_DISPATCHER
   -- If too small, more intercept missions may be triggered upon detected target areas.
   -- If too large, any airborne cap may not be able to reach the detected target area in time, because it is too far.
   -- @param #AI_A2A_DISPATCHER self
-  -- @param #number FriendliesRadius The radius to report friendlies near the target.
+  -- @param #number EngageRadius (Optional, Default = 100000) The radius to report friendlies near the target.
   -- @return #AI_A2A_DISPATCHER
   -- @usage
   -- 
-  --   -- Set 100km as the radius to engage any target by airborne friendlies.
-  --   Dispatcher:InitDetectionFriendiesRadius( 100000 )
+  --   -- Set 50km as the radius to engage any target by airborne friendlies.
+  --   Dispatcher:SetEngageRadius( 50000 )
   --   
-  function AI_A2A_DISPATCHER:SetEngageRadius( FriendliesRadius )
+  --   -- Set 100km as the radius to engage any target by airborne friendlies.
+  --   Dispatcher:SetEngageRadius() -- 100000 is the default value.
+  --   
+  function AI_A2A_DISPATCHER:SetEngageRadius( EngageRadius )
 
-    self.Detection:SetFriendliesRange( FriendliesRadius )
+    self.Detection:SetFriendliesRange( EngageRadius )
   
     return self
   end
+  
+  --- Define the radius to check if a target can be engaged by an ground controlled intercept.
+  -- So, if there is a target area detected and reported, 
+  -- and a GCI is to be executed, 
+  -- then it will be check if the target is within the GCI from the nearest airbase.
+  -- For example, if 150000 is given as a value, then any airbase within 150km from the detected target, 
+  -- will be considered to receive the command to GCI.
+  -- You need to evaluate the value of this parameter carefully.
+  -- If too small, intercept missions may be triggered too late.
+  -- If too large, intercept missions may be triggered when the detected target is too far.
+  -- @param #AI_A2A_DISPATCHER self
+  -- @param #number GciRadius (Optional, Default = 200000) The radius to ground control intercept detected targets from the nearest airbase.
+  -- @return #AI_A2A_DISPATCHER
+  -- @usage
+  -- 
+  --   -- Set 100km as the radius to ground control intercept detected targets from the nearest airbase.
+  --   Dispatcher:SetGciRadius( 100000 )
+  --   
+  --   -- Set 200km as the radius to ground control intercept.
+  --   Dispatcher:SetGciRadius() -- 200000 is the default value.
+  --   
+  function AI_A2A_DISPATCHER:SetGciRadius( GciRadius )
+
+    self.GciRadius = GciRadius or 200000 
+  
+    return self
+  end
+  
+  
   
   --- Define a border area to simulate a **cold war** scenario.
   -- A **cold war** is one where CAP aircraft patrol their territory but will not attack enemy aircraft or launch GCI aircraft unless enemy aircraft enter their territory. In other words the EWR may detect an enemy aircraft but will only send aircraft to attack it if it crosses the border.
@@ -37478,7 +37592,7 @@ do -- AI_A2A_DISPATCHER
   -- @return #number, Core.CommandCenter#REPORT
   function AI_A2A_DISPATCHER:GetAIFriendliesNearBy( DetectedItem )
   
-    local FriendliesNearBy = self.Detection:GetFriendliesNearBy( DetectedItem )
+    local FriendliesNearBy = self.Detection:GetFriendliesDistance( DetectedItem )
     
     return FriendliesNearBy
   end
@@ -37611,7 +37725,8 @@ do -- AI_A2A_DISPATCHER
     DefenderSquadron.Resources = Resources
     
     self:SetSquadronOverhead( SquadronName, 1 )
-    self:SetSquadronTakeoffFromParkingHot( SquadronName )
+    self:SetSquadronTakeoffInAir( SquadronName )
+    self:SetSquadronLandingNearAirbase(SquadronName)
 
     return self
   end
@@ -37708,14 +37823,14 @@ do -- AI_A2A_DISPATCHER
 
     local Cap = self.DefenderSquadrons[SquadronName].Cap
     if Cap then
-      Cap.LowInterval = LowInterval
-      Cap.HighInterval = HighInterval
-      Cap.Probability = Probability
+      Cap.LowInterval = LowInterval or 300
+      Cap.HighInterval = HighInterval or 600
+      Cap.Probability = Probability or 1
       Cap.CapLimit = CapLimit
       Cap.Scheduler = Cap.Scheduler or SCHEDULER:New( self ) 
       local Scheduler = Cap.Scheduler -- Core.Scheduler#SCHEDULER
-      local Variance = ( HighInterval - LowInterval ) / 2
-      local Median = LowInterval + Variance
+      local Variance = ( Cap.HighInterval - Cap.LowInterval ) / 2
+      local Median = Cap.LowInterval + Variance
       local Randomization = Variance / Median
       Scheduler:Schedule(self, self.SchedulerCAP, { SquadronName }, Median, Median, Randomization )
     else
@@ -38336,9 +38451,6 @@ do -- AI_A2A_DISPATCHER
   -- @param #AI_A2A_DISPATCHER self
   function AI_A2A_DISPATCHER:onafterGCI( From, Event, To, Target, DefendersMissing, AIGroups )
 
-    local ClosestDistance = 0
-    local ClosestDefenderSquadronName = nil
-    
     local AttackerCount = Target.Set:Count()
     local DefendersCount = 0
 
@@ -38353,6 +38465,10 @@ do -- AI_A2A_DISPATCHER
     end
 
     DefendersCount = DefendersMissing
+
+    local ClosestDistance = 0
+    local ClosestDefenderSquadronName = nil
+    
     while( DefendersCount > 0 ) do
     
       for SquadronName, DefenderSquadron in pairs( self.DefenderSquadrons or {} ) do
@@ -38361,10 +38477,14 @@ do -- AI_A2A_DISPATCHER
           local SpawnCoord = DefenderSquadron.Airbase:GetCoordinate() -- Core.Point#COORDINATE
           local TargetCoord = Target.Set:GetFirst():GetCoordinate()
           local Distance = SpawnCoord:Get2DDistance( TargetCoord )
-    
+          
           if ClosestDistance == 0 or Distance < ClosestDistance then
-            ClosestDistance = Distance
-            ClosestDefenderSquadronName = SquadronName
+            
+            -- Only intercept if the distance to target is smaller or equal to the GciRadius limit.
+            if Distance <= self.GciRadius then
+              ClosestDistance = Distance
+              ClosestDefenderSquadronName = SquadronName
+            end
           end
         end
       end
@@ -38436,6 +38556,9 @@ do -- AI_A2A_DISPATCHER
             end
           end
         end
+      else
+        -- There isn't any closest airbase anymore, break the loop.
+        break
       end
     end
   end
@@ -38698,7 +38821,126 @@ do
     self:CAP( SquadronName )
   end
 
-end--- **AI** -- **Air Patrolling or Staging.**
+end
+
+do
+
+  --- AI_A2A_DISPATCHER_GCICAP class.
+  -- @type AI_A2A_DISPATCHER_GCICAP
+  -- @extends #AI_A2A_DISPATCHER
+
+  --- # AI\_A2A\_DISPATCHER\_GCICAP class, extends @{AI#AI_A2A_DISPATCHER}
+  -- 
+  -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia1.JPG)
+  -- 
+  -- The @{#AI_A2A_DISPATCHER} class is designed to create an automatic air defence system for a coalition. 
+  -- 
+  -- 
+  -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia3.JPG)
+  -- 
+  -- It includes automatic spawning of Combat Air Patrol aircraft (CAP) and Ground Controlled Intercept aircraft (GCI) in response to enemy air movements that are detected by a ground based radar network. 
+  -- CAP flights will take off and proceed to designated CAP zones where they will remain on station until the ground radars direct them to intercept detected enemy aircraft or they run short of fuel and must return to base (RTB). When a CAP flight leaves their zone to perform an interception or return to base a new CAP flight will spawn to take their place.
+  -- If all CAP flights are engaged or RTB then additional GCI interceptors will scramble to intercept unengaged enemy aircraft under ground radar control.
+  -- With a little time and with a little work it provides the mission designer with a convincing and completely automatic air defence system. 
+  -- In short it is a plug in very flexible and configurable air defence module for DCS World.
+  -- 
+  -- Note that in order to create a two way A2A defense system, two AI\_A2A\_DISPATCHER_GCICAP defense system may need to be created, for each coalition one.
+  -- This is a good implementation, because maybe in the future, more coalitions may become available in DCS world.
+  -- 
+  -- ## 1. AI\_A2A\_DISPATCHER\_GCICAP constructor:
+  -- 
+  -- The @{#AI_A2A_DISPATCHER_GCICAP.New}() method creates a new AI\_A2A\_DISPATCHER\_GCICAP instance.
+  -- There are two parameters required, a list of prefix group names that collects the groups of the EWR network, and a radius in meters, 
+  -- that will be used to group the detected targets.
+  -- 
+  -- ### 1.1. Define the **EWR network**:
+  -- 
+  -- As part of the AI\_A2A\_DISPATCHER\_GCICAP constructor, a list of prefixes must be given of the group names defined within the mission editor,
+  -- that define the EWR network.
+  -- 
+  -- An EWR network, or, Early Warning Radar network, is used to early detect potential airborne targets and to understand the position of patrolling targets of the enemy.
+  -- 
+  -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia5.JPG)
+  -- 
+  -- Typically EWR networks are setup using 55G6 EWR, 1L13 EWR, Hawk sr and Patriot str ground based radar units. 
+  -- These radars have different ranges and 55G6 EWR and 1L13 EWR radars are Eastern Bloc units (eg Russia, Ukraine, Georgia) while the Hawk and Patriot radars are Western (eg US).
+  -- Additionally, ANY other radar capable unit can be part of the EWR network! Also AWACS airborne units, planes, helicopters can help to detect targets, as long as they have radar.
+  -- The position of these units is very important as they need to provide enough coverage 
+  -- to pick up enemy aircraft as they approach so that CAP and GCI flights can be tasked to intercept them.
+  -- 
+  -- ![Banner Image](..\Presentations\AI_A2A_DISPATCHER\Dia7.JPG)
+  --  
+  -- Additionally in a hot war situation where the border is no longer respected the placement of radars has a big effect on how fast the war escalates. 
+  -- For example if they are a long way forward and can detect enemy planes on the ground and taking off 
+  -- they will start to vector CAP and GCI flights to attack them straight away which will immediately draw a response from the other coalition. 
+  -- Having the radars further back will mean a slower escalation because fewer targets will be detected and 
+  -- therefore less CAP and GCI flights will spawn and this will tend to make just the border area active rather than a melee over the whole map. 
+  -- It all depends on what the desired effect is. 
+  -- 
+  -- EWR networks are **dynamically maintained**. By defining in a **smart way the names or name prefixes of the groups** with EWR capable units, these groups will be **automatically added or deleted** from the EWR network, 
+  -- increasing or decreasing the radar coverage of the Early Warning System.
+  -- 
+  -- See the following example to setup an EWR network containing EWR stations and AWACS.
+  -- 
+  --     -- Setup the A2A GCICAP dispatcher, and initialize it.
+  --     A2ADispatcher = AI_A2A_DISPATCHER_GCICAP:New( { "DF CCCP AWACS", "DF CCCP EWR" }, 30000 )
+  -- 
+  -- The above example creates a new AI_A2A_DISPATCHER_GCICAP instance, and stores this in the variable (object) **A2ADispatcher**.
+  -- The first parameter is are the prefixes of the group names that define the EWR network.
+  -- The A2A dispatcher will filter all active groups with a group name starting with **DF CCCP AWACS** or **DF CCCP EWR** to be included in the EWR network.
+  -- 
+  -- ### 1.2. Define the detected **target grouping radius**:
+  -- 
+  -- As a second parameter of the @{#AI_A2A_DISPATCHER_GCICAP.New}() method, a radius in meters must be given. The radius indicates that detected targets need to be grouped within a radius of 30km.
+  -- The grouping radius should not be too small, but also depends on the types of planes and the era of the simulation.
+  -- Fast planes like in the 80s, need a larger radius than WWII planes.  
+  -- Typically I suggest to use 30000 for new generation planes and 10000 for older era aircraft.
+  -- 
+  -- Note that detected targets are constantly re-grouped, that is, when certain detected aircraft are moving further than the group radius, then these aircraft will become a separate
+  -- group being detected. This may result in additional GCI being started by the dispatcher! So don't make this value too small!
+  -- 
+  -- ## 2. AI_A2A_DISPATCHER_DOCUMENTATION is derived from @{#AI_A2A_DISPATCHER}, 
+  -- so all further documentation needs to be consulted in this class
+  -- for documentation consistency.
+  -- 
+  -- @field #AI_A2A_DISPATCHER_GCICAP
+  AI_A2A_DISPATCHER_GCICAP = {
+    ClassName = "AI_A2A_DISPATCHER_GCICAP",
+    Detection = nil,
+  }
+
+
+  --- AI_A2A_DISPATCHER_GCICAP constructor.
+  -- @param #AI_A2A_DISPATCHER_GCICAP self
+  -- @param #list<#string> EWRPrefixes A list of prefixes that of groups that setup the Early Warning Radar network.
+  -- @param #number GroupingRadius The radius in meters wherein detected planes are being grouped as one target area. 
+  -- For airplanes, 6000 (6km) is recommended, and is also the default value of this parameter.
+  -- @return #AI_A2A_DISPATCHER_GCICAP
+  -- @usage
+  --   
+  --   -- Set a new AI A2A Dispatcher object, based on an EWR network with a 30 km grouping radius
+  --   -- This for ground and awacs installations.
+  --   
+  --   A2ADispatcher = AI_A2A_DISPATCHER_GCICAP:New( { "BlueEWRGroundRadars", "BlueEWRAwacs" }, 30000 )
+  --   
+  function AI_A2A_DISPATCHER_GCICAP:New( EWRPrefixes, GroupingRadius )
+
+    local SetGroup = SET_GROUP:New()
+    SetGroup:FilterPrefixes( EWRPrefixes )
+    SetGroup:FilterStart()
+
+    local Detection  = DETECTION_AREAS:New( SetGroup, GroupingRadius )
+
+    local self = BASE:Inherit( self, AI_A2A_DISPATCHER:New( Detection ) ) -- #AI_A2A_DISPATCHER_GCICAP
+    
+    self:__Start( 5 )
+    
+    return self
+  end
+
+end
+
+--- **AI** -- **Air Patrolling or Staging.**
 -- 
 -- ![Banner Image](..\Presentations\AI_PATROL\Dia1.JPG)
 -- 
@@ -47634,6 +47876,8 @@ do -- TASK_A2G_CAS
 end
 --- **Tasking** - The TASK_A2A_DISPATCHER creates and manages player TASK_A2A tasks based on detected targets.
 -- 
+-- The @{#TASK_A2A_DISPATCHER} classes implement the dynamic dispatching of tasks upon groups of detected units determined a @{Set} of EWR installation groups.
+-- 
 -- ====
 -- 
 -- ### Author: **Sven Van de Velde (FlightControl)**
@@ -47652,19 +47896,116 @@ do -- TASK_A2A_DISPATCHER
 
   --- # TASK_A2A_DISPATCHER class, extends @{Tasking#DETECTION_MANAGER}
   -- 
+  -- ![Banner Image](..\Presentations\TASK_A2A_DISPATCHER\Dia1.JPG)
+  -- 
   -- The @{#TASK_A2A_DISPATCHER} class implements the dynamic dispatching of tasks upon groups of detected units determined a @{Set} of EWR installation groups.
+  -- 
+  -- ![Banner Image](..\Presentations\TASK_A2A_DISPATCHER\Dia3.JPG)
+  -- 
   -- The EWR will detect units, will group them, and will dispatch @{Task}s to groups. Depending on the type of target detected, different tasks will be dispatched.
   -- Find a summary below describing for which situation a task type is created:
+  -- 
+  -- ![Banner Image](..\Presentations\TASK_A2A_DISPATCHER\Dia9.JPG)
   -- 
   --   * **INTERCEPT Task**: Is created when the target is known, is detected and within a danger zone, and there is no friendly airborne in range.
   --   * **SWEEP Task**: Is created when the target is unknown, was detected and the last position is only known, and within a danger zone, and there is no friendly airborne in range.
   --   * **ENGAGE Task**: Is created when the target is known, is detected and within a danger zone, and there is a friendly airborne in range, that will receive this task.
-  --   
-  -- Other task types will follow...
   -- 
-  -- # TASK_A2A_DISPATCHER constructor:
-  -- --------------------------------------
-  -- The @{#TASK_A2A_DISPATCHER.New}() method creates a new TASK_A2A_DISPATCHER instance.
+  -- ## 1. TASK\_A2A\_DISPATCHER constructor:
+  -- 
+  -- The @{#TASK_A2A_DISPATCHER.New}() method creates a new TASK\_A2A\_DISPATCHER instance.
+  -- 
+  -- ### 1.1. Define or set the **Mission**:
+  -- 
+  -- Tasking is executed to accomplish missions. Therefore, a MISSION object needs to be given as the first parameter.
+  -- 
+  --     local HQ = GROUP:FindByName( "HQ", "Bravo" )
+  --     local CommandCenter = COMMANDCENTER:New( HQ, "Lima" )
+  --     local Mission = MISSION:New( CommandCenter, "A2A Mission", "High", "Watch the air enemy units being detected.", coalition.side.RED )
+  -- 
+  -- Missions are governed by COMMANDCENTERS, so, ensure you have a COMMANDCENTER object installed and setup within your mission.
+  -- Create the MISSION object, and hook it under the command center.
+  -- 
+  -- ### 1.2. Build a set of the groups seated by human players:
+  -- 
+  -- ![Banner Image](..\Presentations\TASK_A2A_DISPATCHER\Dia6.JPG)
+  -- 
+  -- A set or collection of the groups wherein human players can be seated, these can be clients or units that can be joined as a slot or jumping into.
+  --     
+  --     local AttackGroups = SET_GROUP:New():FilterCoalitions( "red" ):FilterPrefixes( "Defender" ):FilterStart()
+  --     
+  -- The set is built using the SET_GROUP class. Apply any filter criteria to identify the correct groups for your mission.
+  -- Only these slots or units will be able to execute the mission and will receive tasks for this mission, once available.
+  -- 
+  -- ### 1.3. Define the **EWR network**:
+  -- 
+  -- As part of the TASK\_A2A\_DISPATCHER constructor, an EWR network must be given as the third parameter.
+  -- An EWR network, or, Early Warning Radar network, is used to early detect potential airborne targets and to understand the position of patrolling targets of the enemy.
+  -- 
+  -- ![Banner Image](..\Presentations\TASK_A2A_DISPATCHER\Dia5.JPG)
+  -- 
+  -- Typically EWR networks are setup using 55G6 EWR, 1L13 EWR, Hawk sr and Patriot str ground based radar units. 
+  -- These radars have different ranges and 55G6 EWR and 1L13 EWR radars are Eastern Bloc units (eg Russia, Ukraine, Georgia) while the Hawk and Patriot radars are Western (eg US).
+  -- Additionally, ANY other radar capable unit can be part of the EWR network! Also AWACS airborne units, planes, helicopters can help to detect targets, as long as they have radar.
+  -- The position of these units is very important as they need to provide enough coverage 
+  -- to pick up enemy aircraft as they approach so that CAP and GCI flights can be tasked to intercept them.
+  -- 
+  -- ![Banner Image](..\Presentations\TASK_A2A_DISPATCHER\Dia7.JPG)
+  --  
+  -- Additionally in a hot war situation where the border is no longer respected the placement of radars has a big effect on how fast the war escalates. 
+  -- For example if they are a long way forward and can detect enemy planes on the ground and taking off 
+  -- they will start to vector CAP and GCI flights to attack them straight away which will immediately draw a response from the other coalition. 
+  -- Having the radars further back will mean a slower escalation because fewer targets will be detected and 
+  -- therefore less CAP and GCI flights will spawn and this will tend to make just the border area active rather than a melee over the whole map. 
+  -- It all depends on what the desired effect is. 
+  -- 
+  -- EWR networks are **dynamically constructed**, that is, they form part of the @{Functional#DETECTION_BASE} object that is given as the input parameter of the TASK\_A2A\_DISPATCHER class.
+  -- By defining in a **smart way the names or name prefixes of the groups** with EWR capable units, these groups will be **automatically added or deleted** from the EWR network, 
+  -- increasing or decreasing the radar coverage of the Early Warning System.
+  -- 
+  -- See the following example to setup an EWR network containing EWR stations and AWACS.
+  -- 
+  --     local EWRSet = SET_GROUP:New():FilterPrefixes( "EWR" ):FilterCoalitions("red"):FilterStart()
+  --
+  --     local EWRDetection = DETECTION_AREAS:New( EWRSet, 6000 )
+  --     EWRDetection:SetFriendliesRange( 10000 )
+  --     EWRDetection:SetDetectionInterval(30)
+  --
+  --     -- Setup the A2A dispatcher, and initialize it.
+  --     A2ADispatcher = TASK_A2A_DISPATCHER:New( Mission, AttackGroups, EWRDetection )
+  -- 
+  -- The above example creates a SET_GROUP instance, and stores this in the variable (object) **EWRSet**.
+  -- **EWRSet** is then being configured to filter all active groups with a group name starting with **EWR** to be included in the Set.
+  -- **EWRSet** is then being ordered to start the dynamic filtering. Note that any destroy or new spawn of a group with the above names will be removed or added to the Set.
+  -- Then a new **EWRDetection** object is created from the class DETECTION_AREAS. A grouping radius of 6000 is choosen, which is 6km.
+  -- The **EWRDetection** object is then passed to the @{#TASK_A2A_DISPATCHER.New}() method to indicate the EWR network configuration and setup the A2A tasking and detection mechanism.
+  -- 
+  -- ### 2. Define the detected **target grouping radius**:
+  -- 
+  -- ![Banner Image](..\Presentations\TASK_A2A_DISPATCHER\Dia8.JPG)
+  -- 
+  -- The target grouping radius is a property of the Detection object, that was passed to the AI\_A2A\_DISPATCHER object, but can be changed.
+  -- The grouping radius should not be too small, but also depends on the types of planes and the era of the simulation.
+  -- Fast planes like in the 80s, need a larger radius than WWII planes.  
+  -- Typically I suggest to use 30000 for new generation planes and 10000 for older era aircraft.
+  -- 
+  -- Note that detected targets are constantly re-grouped, that is, when certain detected aircraft are moving further than the group radius, then these aircraft will become a separate
+  -- group being detected. This may result in additional GCI being started by the dispatcher! So don't make this value too small!
+  -- 
+  -- ## 3. Set the **Engage radius**:
+  -- 
+  -- Define the radius to engage any target by airborne friendlies, which are executing cap or returning from an intercept mission.
+  -- 
+  -- ![Banner Image](..\Presentations\TASK_A2A_DISPATCHER\Dia11.JPG)
+  -- 
+  -- So, if there is a target area detected and reported, 
+  -- then any friendlies that are airborne near this target area, 
+  -- will be commanded to (re-)engage that target when available (if no other tasks were commanded).
+  -- For example, if 100000 is given as a value, then any friendly that is airborne within 100km from the detected target, 
+  -- will be considered to receive the command to engage that target area.
+  -- You need to evaluate the value of this parameter carefully.
+  -- If too small, more intercept missions may be triggered upon detected target areas.
+  -- If too large, any airborne cap may not be able to reach the detected target area in time, because it is too far.
   -- 
   -- @field #TASK_A2A_DISPATCHER
   TASK_A2A_DISPATCHER = {
@@ -47712,6 +48053,36 @@ do -- TASK_A2A_DISPATCHER
     
     return self
   end
+  
+
+  --- Define the radius to when an ENGAGE task will be generated for any nearby by airborne friendlies, which are executing cap or returning from an intercept mission.
+  -- So, if there is a target area detected and reported, 
+  -- then any friendlies that are airborne near this target area, 
+  -- will be commanded to (re-)engage that target when available (if no other tasks were commanded).
+  -- An ENGAGE task will be created for those pilots.
+  -- For example, if 100000 is given as a value, then any friendly that is airborne within 100km from the detected target, 
+  -- will be considered to receive the command to engage that target area.
+  -- You need to evaluate the value of this parameter carefully.
+  -- If too small, more intercept missions may be triggered upon detected target areas.
+  -- If too large, any airborne cap may not be able to reach the detected target area in time, because it is too far.
+  -- @param #TASK_A2A_DISPATCHER self
+  -- @param #number EngageRadius (Optional, Default = 100000) The radius to report friendlies near the target.
+  -- @return #TASK_A2A_DISPATCHER
+  -- @usage
+  -- 
+  --   -- Set 50km as the radius to engage any target by airborne friendlies.
+  --   TaskA2ADispatcher:SetEngageRadius( 50000 )
+  --   
+  --   -- Set 100km as the radius to engage any target by airborne friendlies.
+  --   TaskA2ADispatcher:SetEngageRadius() -- 100000 is the default value.
+  --   
+  function TASK_A2A_DISPATCHER:SetEngageRadius( EngageRadius )
+
+    self.Detection:SetFriendliesRange( EngageRadius or 100000 )
+  
+    return self
+  end
+  
   
   
   --- Creates an INTERCEPT task when there are targets for it.
@@ -48061,7 +48432,6 @@ end
 --- **Tasking** - The TASK_A2A models tasks for players in Air to Air engagements.
 -- 
 -- ![Banner Image](..\Presentations\TASK_A2A\Dia1.JPG)
--- 
 -- 
 -- ====
 -- 
