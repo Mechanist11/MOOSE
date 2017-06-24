@@ -1,5 +1,5 @@
 env.info( '*** MOOSE STATIC INCLUDE START *** ' )
-env.info( 'Moose Generation Timestamp: 20170623_2206' )
+env.info( 'Moose Generation Timestamp: 20170624_1531' )
 
 --- Various routines
 -- @module routines
@@ -24183,9 +24183,7 @@ function SCORING:_AddMissionTaskScore( Mission, PlayerUnit, Text, Score )
     PlayerData.Score = self.Players[PlayerName].Score + Score
     PlayerData.Mission[MissionName].ScoreTask = self.Players[PlayerName].Mission[MissionName].ScoreTask + Score
   
-    MESSAGE:New( "Player '" .. PlayerName .. "' has " .. Text .. " in Mission '" .. MissionName .. "'. " ..
-      Score .. " task score!",
-      30 ):ToAll()
+    MESSAGE:New( MissionName .. " : " .. Text .. " Score: " .. Score, 30 ):ToAll()
   
     self:ScoreCSV( PlayerName, "", "TASK_" .. MissionName:gsub( ' ', '_' ), 1, Score, PlayerUnit:GetName() )
   end
@@ -43589,18 +43587,20 @@ do -- ACT_ACCOUNT
     -- Inherits from BASE
     local self = BASE:Inherit( self, FSM_PROCESS:New() ) -- Core.Fsm#FSM_PROCESS
   
-    self:AddTransition( "Assigned", "Start", "Waiting")
-    self:AddTransition( "*", "Wait", "Waiting")
-    self:AddTransition( "*", "Report", "Report")
-    self:AddTransition( "*", "Event", "Account")
-    self:AddTransition( "Account", "More", "Wait")
-    self:AddTransition( "Account", "NoMore", "Accounted")
-    self:AddTransition( "*", "Fail", "Failed")
+    self:AddTransition( "Assigned", "Start", "Waiting" )
+    self:AddTransition( "*", "Wait", "Waiting" )
+    self:AddTransition( "*", "Report", "Report" )
+    self:AddTransition( "*", "Event", "Account" )
+    self:AddTransition( "Account", "Player", "AccountForPlayer" )
+    self:AddTransition( "Account", "Other", "AccountForOther" )
+    self:AddTransition( { "Account", "AccountForPlayer", "AccountForOther" }, "More", "Wait" )
+    self:AddTransition( { "Account", "AccountForPlayer", "AccountForOther" }, "NoMore", "Accounted" )
+    self:AddTransition( "*", "Fail", "Failed" )
     
     self:AddEndState( "Failed" )
     
     self:SetStartState( "Assigned" ) 
-        
+    
     return self
   end
 
@@ -43616,6 +43616,7 @@ do -- ACT_ACCOUNT
 
     self:HandleEvent( EVENTS.Dead, self.onfuncEventDead )
     self:HandleEvent( EVENTS.Crash, self.onfuncEventCrash )
+    self:HandleEvent( EVENTS.Hit )
 
     self:__Wait( 1 )
   end
@@ -43718,43 +43719,87 @@ do -- ACT_ACCOUNT_DEADS
   
   --- StateMachine callback function
   -- @param #ACT_ACCOUNT_DEADS self
-  -- @param Wrapper.Controllable#CONTROLLABLE ProcessUnit
-  -- @param #string Event
+  -- @param Wrapper.Client#CLIENT ProcessClient
+  -- @param Tasking.Task#TASK Task
   -- @param #string From
+  -- @param #string Event
   -- @param #string To
-  function ACT_ACCOUNT_DEADS:onenterAccount( ProcessUnit, Task, From, Event, To, EventData  )
-    self:T( { ProcessUnit, EventData, From, Event, To } )
+  -- @param Core.Event#EVENTDATA EventData
+  function ACT_ACCOUNT_DEADS:onafterEvent( ProcessClient, Task, From, Event, To, EventData  )
+    self:T( { ProcessClient:GetName(), Task:GetName(), From, Event, To, EventData } )
     
-    self:T( { self.Controllable } )
-  
-    self.TargetSetUnit:Flush()
-    
-    self:T( { "Before sending Message", EventData.IniUnitName, self.TargetSetUnit:FindUnit( EventData.IniUnitName ) } )
     if self.TargetSetUnit:FindUnit( EventData.IniUnitName ) then
-      self:T( "Sending Message" )
-      local TaskGroup = ProcessUnit:GetGroup()
-      self.TargetSetUnit:Remove( EventData.IniUnitName )
-      self:Message( "Target destroyed. Your group with assigned " .. self.TaskName .. " task has " .. self.TargetSetUnit:Count() .. " targets ( " .. self.TargetSetUnit:GetUnitTypesText() .. " ) left to be destroyed." )
+      local PlayerName = ProcessClient:GetPlayerName()
+      local PlayerHit = self.PlayerHits and self.PlayerHits[EventData.IniUnitName]
+      if PlayerHit == PlayerName then
+        self:Player( EventData )
+      else
+        self:Other( EventData )
+      end
     end
-    self:T( { "After sending Message" } )
   end
-  
+
   --- StateMachine callback function
   -- @param #ACT_ACCOUNT_DEADS self
-  -- @param Wrapper.Controllable#CONTROLLABLE ProcessUnit
-  -- @param #string Event
+  -- @param Wrapper.Client#CLIENT ProcessClient
+  -- @param Tasking.Task#TASK Task
   -- @param #string From
+  -- @param #string Event
   -- @param #string To
-  function ACT_ACCOUNT_DEADS:onafterEvent( ProcessUnit, Task, From, Event, To )
-  
+  -- @param Core.Event#EVENTDATA EventData
+  function ACT_ACCOUNT_DEADS:onenterAccountForPlayer( ProcessClient, Task, From, Event, To, EventData  )
+    self:T( { ProcessClient:GetName(), Task:GetName(), From, Event, To, EventData } )
+    
+    local TaskGroup = ProcessClient:GetGroup()
+
+    self.TargetSetUnit:Remove( EventData.IniUnitName )
+    self:Message( "You have destroyed a target. Your group assigned with task " .. self.TaskName .. " has " .. self.TargetSetUnit:Count() .. " targets ( " .. self.TargetSetUnit:GetUnitTypesText() .. " ) left to be destroyed." )
+
+    local PlayerName = ProcessClient:GetPlayerName()
+    Task:AddProgress( PlayerName, "Destroyed " .. EventData.IniTypeName, timer.getTime(), 1 )
+
     if self.TargetSetUnit:Count() > 0 then
       self:__More( 1 )
     else
       self:__NoMore( 1 )
     end
   end
+
+  --- StateMachine callback function
+  -- @param #ACT_ACCOUNT_DEADS self
+  -- @param Wrapper.Client#CLIENT ProcessClient
+  -- @param Tasking.Task#TASK Task
+  -- @param #string From
+  -- @param #string Event
+  -- @param #string To
+  -- @param Core.Event#EVENTDATA EventData
+  function ACT_ACCOUNT_DEADS:onenterAccountForOther( ProcessClient, Task, From, Event, To, EventData  )
+    self:T( { ProcessClient:GetName(), Task:GetName(), From, Event, To, EventData } )
+    
+    local TaskGroup = ProcessClient:GetGroup()
+    self.TargetSetUnit:Remove( EventData.IniUnitName )
+    self:Message( "One of the task targets has been destroyed. Your group assigned with task " .. self.TaskName .. " has " .. self.TargetSetUnit:Count() .. " targets ( " .. self.TargetSetUnit:GetUnitTypesText() .. " ) left to be destroyed." )
+
+    if self.TargetSetUnit:Count() > 0 then
+      self:__More( 1 )
+    else
+      self:__NoMore( 1 )
+    end
+  end
+
   
   --- DCS Events
+  
+  --- @param #ACT_ACCOUNT_DEADS self
+  -- @param Core.Event#EVENTDATA EventData
+  function ACT_ACCOUNT_DEADS:OnEventHit( EventData )
+    self:T( { "EventDead", EventData } )
+
+    if EventData.IniPlayerName and EventData.TgtDCSUnitName then
+      self.PlayerHits = self.PlayerHits or {}
+      self.PlayerHits[EventData.TgtDCSUnitName] = EventData.IniPlayerName
+    end
+  end  
   
   --- @param #ACT_ACCOUNT_DEADS self
   -- @param Event#EVENTDATA EventData
@@ -45632,6 +45677,8 @@ function TASK:New( Mission, SetGroupAssign, TaskName, TaskType, TaskBriefing )
   
   self.TaskInfo = {}
   
+  self.TaskProgress = {}
+  
   return self
 end
 
@@ -46872,6 +46919,75 @@ end
 
 
 end -- Reporting
+
+
+do -- Additional Task Scoring and Task Progress
+
+  --- Add Task Progress for a Player Name
+  -- @param #TASK self
+  -- @param #string PlayerName The name of the player.
+  -- @param #string ProgressText The text that explains the Progress achieved.
+  -- @param #number ProgressTime The time the progress was achieved.
+  -- @oaram #number ProgressPoints The amount of points of magnitude granted. This will determine the shared Mission Success scoring.
+  -- @return #TASK
+  function TASK:AddProgress( PlayerName, ProgressText, ProgressTime, ProgressPoints )
+    self.TaskProgress = self.TaskProgress or {}
+    self.TaskProgress[ProgressTime] = self.TaskProgress[ProgressTime] or {}
+    self.TaskProgress[ProgressTime].PlayerName = PlayerName
+    self.TaskProgress[ProgressTime].ProgressText = ProgressText
+    self.TaskProgress[ProgressTime].ProgressPoints = ProgressPoints
+    return self
+  end
+
+  --- Set a score when progress has been made by the player.
+  -- @param #TASK self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points to be granted when task process has been achieved.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK
+  function TASK:SetScoreOnProgress( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScoreProcess( "Engaging", "Account", "AccountPlayer", "Player " .. PlayerName .. " has achieved progress.", Score )
+    
+    return self
+  end
+
+  --- Set a score when all the targets in scope of the A2A attack, have been destroyed.
+  -- @param #TASK self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK
+  function TASK:SetScoreOnSuccess( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Success", "The task is a success!", Score )
+    
+    return self
+  end
+
+  --- Set a penalty when the A2A attack has failed.
+  -- @param #TASK self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Penalty The penalty in points, must be a negative value!
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK
+  function TASK:SetScoreOnFail( PlayerName, Penalty, TaskUnit )
+    self:F( { PlayerName, Penalty, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Failed", "The task is a failure!", Penalty )
+    
+    return self
+  end
+
+end
 --- This module contains the DETECTION_MANAGER class and derived classes.
 -- 
 -- ===
@@ -47704,55 +47820,6 @@ do -- TASK_A2G
     local ActRouteTarget = ProcessUnit:GetProcess( "Engaging", "RouteToTargetZone" ) -- Actions.Act_Route#ACT_ROUTE_ZONE
     return ActRouteTarget:GetZone()
   end
-
-  --- Set a score when a target in scope of the A2G attack, has been destroyed .
-  -- @param #TASK_A2G self
-  -- @param #string Text The text to display to the player, when the target has been destroyed.
-  -- @param #number Score The score in points.
-  -- @param Wrapper.Unit#UNIT TaskUnit
-  -- @return #TASK_A2G
-  function TASK_A2G:SetScoreOnDestroy( Text, Score, TaskUnit )
-    self:F( { Text, Score, TaskUnit } )
-
-    local ProcessUnit = self:GetUnitProcess( TaskUnit )
-
-    ProcessUnit:AddScoreProcess( "Engaging", "Account", "Account", Text, Score )
-    
-    return self
-  end
-
-  --- Set a score when all the targets in scope of the A2G attack, have been destroyed.
-  -- @param #TASK_A2G self
-  -- @param #string Text The text to display to the player, when all targets hav been destroyed.
-  -- @param #number Score The score in points.
-  -- @param Wrapper.Unit#UNIT TaskUnit
-  -- @return #TASK_A2G
-  function TASK_A2G:SetScoreOnSuccess( Text, Score, TaskUnit )
-    self:F( { Text, Score, TaskUnit } )
-
-    local ProcessUnit = self:GetUnitProcess( TaskUnit )
-
-    ProcessUnit:AddScore( "Success", Text, Score )
-    
-    return self
-  end
-
-  --- Set a penalty when the A2G attack has failed.
-  -- @param #TASK_A2G self
-  -- @param #string Text The text to display to the player, when the A2G attack has failed.
-  -- @param #number Penalty The penalty in points.
-  -- @param Wrapper.Unit#UNIT TaskUnit
-  -- @return #TASK_A2G
-  function TASK_A2G:SetPenaltyOnFailed( Text, Penalty, TaskUnit )
-    self:F( { Text, Score, TaskUnit } )
-
-    local ProcessUnit = self:GetUnitProcess( TaskUnit )
-
-    ProcessUnit:AddScore( "Failed", Text, Penalty )
-    
-    return self
-  end
-
   
 end 
 
@@ -47818,6 +47885,55 @@ do -- TASK_A2G_SEAD
     self:__Goal( -10 )
   end
 
+  --- Set a score when a target in scope of the A2A attack, has been destroyed .
+  -- @param #TASK_A2G_SEAD self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points to be granted when task process has been achieved.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2G_SEAD
+  function TASK_A2G_SEAD:SetScoreOnProgress( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScoreProcess( "Engaging", "Account", "AccountForPlayer", "Player " .. PlayerName .. " has SEADed a target.", Score )
+    
+    return self
+  end
+
+  --- Set a score when all the targets in scope of the A2A attack, have been destroyed.
+  -- @param #TASK_A2G_SEAD self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2G_SEAD
+  function TASK_A2G_SEAD:SetScoreOnSuccess( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Success", "All radar emitting targets have been successfully SEADed!", Score )
+    
+    return self
+  end
+
+  --- Set a penalty when the A2A attack has failed.
+  -- @param #TASK_A2G_SEAD self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Penalty The penalty in points, must be a negative value!
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2G_SEAD
+  function TASK_A2G_SEAD:SetScoreOnFail( PlayerName, Penalty, TaskUnit )
+    self:F( { PlayerName, Penalty, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Failed", "The SEADing has failed!", Penalty )
+    
+    return self
+  end
+
+
 end
 
 do -- TASK_A2G_BAI
@@ -47882,6 +47998,55 @@ do -- TASK_A2G_BAI
     self:__Goal( -10 )
   end
 
+  --- Set a score when a target in scope of the A2A attack, has been destroyed .
+  -- @param #TASK_A2G_BAI self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points to be granted when task process has been achieved.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2G_BAI
+  function TASK_A2G_BAI:SetScoreOnProgress( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScoreProcess( "Engaging", "Account", "AccountForPlayer", "Player " .. PlayerName .. " has destroyed a target in Battlefield Air Interdiction (BAI).", Score )
+    
+    return self
+  end
+
+  --- Set a score when all the targets in scope of the A2A attack, have been destroyed.
+  -- @param #TASK_A2G_BAI self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2G_BAI
+  function TASK_A2G_BAI:SetScoreOnSuccess( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Success", "All targets have been successfully destroyed! The Battlefield Air Interdiction (BAI) is a success!", Score )
+    
+    return self
+  end
+
+  --- Set a penalty when the A2A attack has failed.
+  -- @param #TASK_A2G_BAI self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Penalty The penalty in points, must be a negative value!
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2G_BAI
+  function TASK_A2G_BAI:SetScoreOnFail( PlayerName, Penalty, TaskUnit )
+    self:F( { PlayerName, Penalty, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Failed", "The Battlefield Air Interdiction (BAI) has failed!", Penalty )
+    
+    return self
+  end
+
+
 end
 
 do -- TASK_A2G_CAS
@@ -47945,6 +48110,55 @@ do -- TASK_A2G_CAS
     
     self:__Goal( -10 )
   end
+
+  --- Set a score when a target in scope of the A2A attack, has been destroyed .
+  -- @param #TASK_A2G_CAS self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points to be granted when task process has been achieved.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2G_CAS
+  function TASK_A2G_CAS:SetScoreOnProgress( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScoreProcess( "Engaging", "Account", "AccountForPlayer", "Player " .. PlayerName .. " has destroyed a target in Close Air Support (CAS).", Score )
+    
+    return self
+  end
+
+  --- Set a score when all the targets in scope of the A2A attack, have been destroyed.
+  -- @param #TASK_A2G_CAS self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2G_CAS
+  function TASK_A2G_CAS:SetScoreOnSuccess( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Success", "All targets have been successfully destroyed! The Close Air Support (CAS) was a success!", Score )
+    
+    return self
+  end
+
+  --- Set a penalty when the A2A attack has failed.
+  -- @param #TASK_A2G_CAS self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Penalty The penalty in points, must be a negative value!
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2G_CAS
+  function TASK_A2G_CAS:SetScoreOnFail( PlayerName, Penalty, TaskUnit )
+    self:F( { PlayerName, Penalty, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Failed", "The Close Air Support (CAS) has failed!", Penalty )
+    
+    return self
+  end
+
 
 end
 --- **Tasking** - The TASK_A2A_DISPATCHER creates and manages player TASK_A2A tasks based on detected targets.
@@ -48080,6 +48294,44 @@ do -- TASK_A2A_DISPATCHER
   -- If too small, more intercept missions may be triggered upon detected target areas.
   -- If too large, any airborne cap may not be able to reach the detected target area in time, because it is too far.
   -- 
+  -- ## 4. Set **Scoring** and **Messages**:
+  -- 
+  -- The TASK\_A2A\_DISPATCHER is a state machine. It triggers the event Assign when a new player joins a @{Task} dispatched by the TASK\_A2A\_DISPATCHER.
+  -- An _event handler_ can be defined to catch the **Assign** event, and add **additional processing** to set _scoring_ and to _define messages_,
+  -- when the player reaches certain achievements in the task.
+  -- 
+  -- The prototype to handle the **Assign** event needs to be developed as follows:
+  -- 
+  --      TaskDispatcher = TASK_A2A_DISPATCHER:New( ... )
+  -- 
+  --      --- @param #TaskDispatcher self
+  --      -- @param #string From Contains the name of the state from where the Event was triggered.
+  --      -- @param #string Event Contains the name of the event that was triggered. In this case Assign.
+  --      -- @param #string To Contains the name of the state that will be transitioned to.
+  --      -- @param Tasking.Task_A2A#TASK_A2A Task The Task object, which is any derived object from TASK_A2A.
+  --      -- @param Wrapper.Unit#UNIT TaskUnit The Unit or Client that contains the Player.
+  --      -- @param #string PlayerName The name of the Player that joined the TaskUnit.
+  --      function TaskDispatcher:OnAfterAssign( From, Event, To, Task, TaskUnit, PlayerName )
+  --        Task:SetScoreOnProgress( PlayerName, 20, TaskUnit )
+  --        Task:SetScoreOnSuccess( PlayerName, 200, TaskUnit )
+  --        Task:SetScoreOnFail( PlayerName, -100, TaskUnit )
+  --      end
+  -- 
+  -- The **OnAfterAssign** method (function) is added to the TaskDispatcher object.
+  -- This method will be called when a new player joins a unit in the set of groups in scope of the dispatcher.
+  -- So, this method will be called only **ONCE** when a player joins a unit in scope of the task.
+  -- 
+  -- The TASK class implements various methods to additional **set scoring** for player achievements:
+  -- 
+  --   * @{Tasking.Task#TASK.SetScoreOnProgress}() will add additional scores when a player achieves **Progress** while executing the task.
+  --     Examples of **task progress** can be destroying units, arriving at zones etc.
+  --   
+  --   * @{Tasking.Task#TASK.SetScoreOnSuccess}() will add additional scores when the task goes into **Success** state. 
+  --     This means the **task has been successfully completed**.
+  --     
+  --   * @{Tasking.Task#TASK.SetScoreOnSuccess}() will add additional (negative) scores when the task goes into **Failed** state. 
+  --     This means the **task has not been successfully completed**, and the scores must be given with a negative value!
+  -- 
   -- @field #TASK_A2A_DISPATCHER
   TASK_A2A_DISPATCHER = {
     ClassName = "TASK_A2A_DISPATCHER",
@@ -48107,7 +48359,7 @@ do -- TASK_A2A_DISPATCHER
     
     -- TODO: Check detection through radar.
     self.Detection:FilterCategories( Unit.Category.AIRPLANE, Unit.Category.HELICOPTER )
-    --self.Detection:InitDetectRadar( true )
+    self.Detection:InitDetectRadar( true )
     self.Detection:SetDetectionInterval( 30 )
     
     self:AddTransition( "Started", "Assign", "Started" )
@@ -48770,55 +49022,6 @@ do -- TASK_A2A
     local ActRouteTarget = ProcessUnit:GetProcess( "Engaging", "RouteToTargetZone" ) -- Actions.Act_Route#ACT_ROUTE_ZONE
     return ActRouteTarget:GetZone()
   end
-
-  --- Set a score when a target in scope of the A2A attack, has been destroyed .
-  -- @param #TASK_A2A self
-  -- @param #string Text The text to display to the player, when the target has been destroyed.
-  -- @param #number Score The score in points.
-  -- @param Wrapper.Unit#UNIT TaskUnit
-  -- @return #TASK_A2A
-  function TASK_A2A:SetScoreOnDestroy( Text, Score, TaskUnit )
-    self:F( { Text, Score, TaskUnit } )
-
-    local ProcessUnit = self:GetUnitProcess( TaskUnit )
-
-    ProcessUnit:AddScoreProcess( "Engaging", "Account", "Account", Text, Score )
-    
-    return self
-  end
-
-  --- Set a score when all the targets in scope of the A2A attack, have been destroyed.
-  -- @param #TASK_A2A self
-  -- @param #string Text The text to display to the player, when all targets hav been destroyed.
-  -- @param #number Score The score in points.
-  -- @param Wrapper.Unit#UNIT TaskUnit
-  -- @return #TASK_A2A
-  function TASK_A2A:SetScoreOnSuccess( Text, Score, TaskUnit )
-    self:F( { Text, Score, TaskUnit } )
-
-    local ProcessUnit = self:GetUnitProcess( TaskUnit )
-
-    ProcessUnit:AddScore( "Success", Text, Score )
-    
-    return self
-  end
-
-  --- Set a penalty when the A2A attack has failed.
-  -- @param #TASK_A2A self
-  -- @param #string Text The text to display to the player, when the A2A attack has failed.
-  -- @param #number Penalty The penalty in points.
-  -- @param Wrapper.Unit#UNIT TaskUnit
-  -- @return #TASK_A2A
-  function TASK_A2A:SetPenaltyOnFailed( Text, Penalty, TaskUnit )
-    self:F( { Text, Score, TaskUnit } )
-
-    local ProcessUnit = self:GetUnitProcess( TaskUnit )
-
-    ProcessUnit:AddScore( "Failed", Text, Penalty )
-    
-    return self
-  end
-
   
 end 
 
@@ -48892,6 +49095,53 @@ do -- TASK_A2A_INTERCEPT
     self:__Goal( -10 )
   end
   
+  --- Set a score when a target in scope of the A2A attack, has been destroyed .
+  -- @param #TASK_A2A_INTERCEPT self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points to be granted when task process has been achieved.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2A_INTERCEPT
+  function TASK_A2A_INTERCEPT:SetScoreOnProgress( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScoreProcess( "Engaging", "Account", "AccountForPlayer", "Player " .. PlayerName .. " has intercepted a target.", Score )
+    
+    return self
+  end
+
+  --- Set a score when all the targets in scope of the A2A attack, have been destroyed.
+  -- @param #TASK_A2A_INTERCEPT self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2A_INTERCEPT
+  function TASK_A2A_INTERCEPT:SetScoreOnSuccess( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Success", "All targets have been successfully intercepted!", Score )
+    
+    return self
+  end
+
+  --- Set a penalty when the A2A attack has failed.
+  -- @param #TASK_A2A_INTERCEPT self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Penalty The penalty in points, must be a negative value!
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2A_INTERCEPT
+  function TASK_A2A_INTERCEPT:SetScoreOnFail( PlayerName, Penalty, TaskUnit )
+    self:F( { PlayerName, Penalty, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Failed", "The intercept has failed!", Penalty )
+    
+    return self
+  end
 
 
 
@@ -48968,6 +49218,54 @@ do -- TASK_A2A_SWEEP
     self:__Goal( -10 )
   end
 
+  --- Set a score when a target in scope of the A2A attack, has been destroyed .
+  -- @param #TASK_A2A_SWEEP self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points to be granted when task process has been achieved.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2A_SWEEP
+  function TASK_A2A_SWEEP:SetScoreOnProgress( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScoreProcess( "Engaging", "Account", "AccountForPlayer", "Player " .. PlayerName .. " has sweeped a target.", Score )
+    
+    return self
+  end
+
+  --- Set a score when all the targets in scope of the A2A attack, have been destroyed.
+  -- @param #TASK_A2A_SWEEP self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2A_SWEEP
+  function TASK_A2A_SWEEP:SetScoreOnSuccess( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Success", "All targets have been successfully sweeped!", Score )
+    
+    return self
+  end
+
+  --- Set a penalty when the A2A attack has failed.
+  -- @param #TASK_A2A_SWEEP self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Penalty The penalty in points, must be a negative value!
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2A_SWEEP
+  function TASK_A2A_SWEEP:SetScoreOnFail( PlayerName, Penalty, TaskUnit )
+    self:F( { PlayerName, Penalty, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Failed", "The sweep has failed!", Penalty )
+    
+    return self
+  end
+
 end
 
 
@@ -49039,6 +49337,53 @@ do -- TASK_A2A_ENGAGE
     self:__Goal( -10 )
   end
   
+  --- Set a score when a target in scope of the A2A attack, has been destroyed .
+  -- @param #TASK_A2A_ENGAGE self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points to be granted when task process has been achieved.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2A_ENGAGE
+  function TASK_A2A_ENGAGE:SetScoreOnProgress( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScoreProcess( "Engaging", "Account", "AccountForPlayer", "Player " .. PlayerName .. " has engaged and destroyed a target.", Score )
+    
+    return self
+  end
+
+  --- Set a score when all the targets in scope of the A2A attack, have been destroyed.
+  -- @param #TASK_A2A_ENGAGE self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Score The score in points.
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2A_ENGAGE
+  function TASK_A2A_ENGAGE:SetScoreOnSuccess( PlayerName, Score, TaskUnit )
+    self:F( { PlayerName, Score, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Success", "All targets have been successfully engaged!", Score )
+    
+    return self
+  end
+
+  --- Set a penalty when the A2A attack has failed.
+  -- @param #TASK_A2A_ENGAGE self
+  -- @param #string PlayerName The name of the player.
+  -- @param #number Penalty The penalty in points, must be a negative value!
+  -- @param Wrapper.Unit#UNIT TaskUnit
+  -- @return #TASK_A2A_ENGAGE
+  function TASK_A2A_ENGAGE:SetScoreOnFail( PlayerName, Penalty, TaskUnit )
+    self:F( { PlayerName, Penalty, TaskUnit } )
+
+    local ProcessUnit = self:GetUnitProcess( TaskUnit )
+
+    ProcessUnit:AddScore( "Failed", "The target engagement has failed!", Penalty )
+    
+    return self
+  end
 
 end
 
@@ -49772,7 +50117,7 @@ do -- TASK_CARGO
   -- @param #number Score The score in points.
   -- @param Wrapper.Unit#UNIT TaskUnit
   -- @return #TASK_CARGO
-  function TASK_CARGO:SetScoreOnDestroy( Text, Score, TaskUnit )
+  function TASK_CARGO:SetScoreOnProgress( Text, Score, TaskUnit )
     self:F( { Text, Score, TaskUnit } )
 
     local ProcessUnit = self:GetUnitProcess( TaskUnit )
@@ -49804,7 +50149,7 @@ do -- TASK_CARGO
   -- @param #number Penalty The penalty in points.
   -- @param Wrapper.Unit#UNIT TaskUnit
   -- @return #TASK_CARGO
-  function TASK_CARGO:SetPenaltyOnFailed( Text, Penalty, TaskUnit )
+  function TASK_CARGO:SetScoreOnFail( Text, Penalty, TaskUnit )
     self:F( { Text, Score, TaskUnit } )
 
     local ProcessUnit = self:GetUnitProcess( TaskUnit )
